@@ -1,0 +1,17 @@
+import type React from "react"
+import AppLayout from "@/components/app-layout"
+
+export default function AdministracionLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  // Elementos específicos para la sección de Administración
+  const adminSidebarItems = [
+    { name: "Usuarios", href: "/administracion" },
+    { name: "Configuración", href: "/administracion/configuracion" },
+    { name: "Reportes", href: "/administracion/reportes" },
+  ]
+
+  return <AppLayout sidebarItems={adminSidebarItems}>{children}</AppLayout>
+}
