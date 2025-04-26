@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -32,10 +33,15 @@ export default function LoginForm() {
     setError("")
 
     try {
-      await login(email, password)
-      router.push("/") // Redirigir al inicio después del login
+      const result = await login(email, password)
+
+      if (result.success) {
+        router.push("/") // Redirigir al inicio después del login
+      } else {
+        setError(result.message || "Credenciales inválidas. Por favor, intente nuevamente.")
+      }
     } catch (err) {
-      setError("Credenciales inválidas. Por favor, intente nuevamente.")
+      setError("Error al iniciar sesión. Por favor, intente nuevamente.")
       console.error("Error de inicio de sesión:", err)
     } finally {
       setIsLoading(false)
@@ -85,14 +91,20 @@ export default function LoginForm() {
             </div>
           </div>
         </CardContent>
-        <CardFooter className="flex flex-col">
+        <CardFooter className="flex flex-col space-y-4">
           <Button className="w-full" type="submit" disabled={isLoading}>
             {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
           </Button>
-          <div className="mt-4 text-center text-sm">
-            <a href="#" className="text-primary hover:underline">
+          <div className="flex flex-col space-y-2 text-center text-sm w-full">
+            <Link href="/forgot-password" className="text-primary hover:underline">
               ¿Olvidaste tu contraseña?
-            </a>
+            </Link>
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-muted-foreground">¿No tienes una cuenta?</span>
+              <Link href="/registro" className="text-primary font-medium hover:underline">
+                Regístrate
+              </Link>
+            </div>
           </div>
         </CardFooter>
       </form>
