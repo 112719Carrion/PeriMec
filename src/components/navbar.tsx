@@ -13,6 +13,7 @@ export default function Navbar() {
   const router = useRouter()
   const { user, isAuthenticated, logout } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   const navItems = [
     { name: "Inicio", href: "/" },
@@ -20,9 +21,19 @@ export default function Navbar() {
     { name: "Administración", href: "/administracion" },
   ]
 
-  const handleLogout = () => {
-    logout()
-    router.push("/")
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true)
+      console.log("Iniciando cierre de sesión...")
+      await logout()
+      console.log("Sesión cerrada, redirigiendo...")
+      router.push("/")
+      router.refresh() // Forzar actualización de la página
+    } catch (error) {
+      console.error("Error en handleLogout:", error)
+    } finally {
+      setIsLoggingOut(false)
+    }
   }
 
   const handleLogin = () => {
@@ -34,7 +45,7 @@ export default function Navbar() {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <span className="font-bold text-xl">PeriMec</span>
+            <span className="font-bold text-xl">Mi Aplicación</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -58,10 +69,20 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-4">
           {isAuthenticated ? (
             <>
-              {user && <span className="text-sm text-muted-foreground">Hola, {user.name}</span>}
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="flex items-center">
+              {user && (
+                <span className="text-sm text-muted-foreground">
+                  Hola, {user.user_metadata?.full_name || user.email}
+                </span>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className="flex items-center"
+                disabled={isLoggingOut}
+              >
                 <LogOut className="h-4 w-4 mr-2" />
-                Cerrar sesión
+                {isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
               </Button>
             </>
           ) : (
@@ -98,12 +119,12 @@ export default function Navbar() {
                 </Link>
               ))}
               {isAuthenticated ? (
-                <Button variant="ghost" className="justify-end px-0" onClick={handleLogout}>
+                <Button variant="ghost" className="justify-start px-0" onClick={handleLogout} disabled={isLoggingOut}>
                   <LogOut className="h-4 w-4 mr-2" />
-                  Cerrar sesión
+                  {isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
                 </Button>
               ) : (
-                <Button variant="ghost" className="justify-end px-0" onClick={handleLogin}>
+                <Button variant="ghost" className="justify-start px-0" onClick={handleLogin}>
                   <LogIn className="h-4 w-4 mr-2" />
                   Iniciar sesión
                 </Button>
