@@ -1,5 +1,5 @@
 "use server"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/src/lib/supabase"
 
 // Tipo para los datos del formulario de registro
 type RegisterFormData = {

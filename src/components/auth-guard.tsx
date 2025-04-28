@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
-import { useAuth } from "@/context/auth-context"
+import { useAuth } from "@/src/context/auth-context"
 
 // Rutas públicas que no requieren autenticación
 const publicRoutes = ["/login"]

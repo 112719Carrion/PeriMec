@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/src/components/ui/button"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/src/components/ui/card"
 import { CheckCircle, XCircle } from "lucide-react"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/src/lib/supabase"
 
 export default function ConfirmAccountPage() {
   const searchParams = useSearchParams()

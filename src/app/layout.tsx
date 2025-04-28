@@ -3,9 +3,10 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 
-import { ThemeProvider } from "@/components/theme-provider"
-import { AuthProvider } from "@/context/auth-context"
-import Navbar from "@/components/navbar"
+import { ThemeProvider } from "@/src/components/theme-provider"
+import { AuthProvider } from "@/src/context/auth-context"
+import { ToastProvider } from "@/src/components/toast-provider"
+import Navbar from "@/src/components/navbar"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -24,10 +25,12 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AuthProvider>
-            <div className="flex min-h-screen flex-col">
-              <Navbar />
-              <main className="flex-1">{children}</main>
-            </div>
+            <ToastProvider>
+              <div className="flex min-h-screen flex-col">
+                <Navbar />
+                <main className="flex-1">{children}</main>
+              </div>
+            </ToastProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

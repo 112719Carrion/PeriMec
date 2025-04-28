@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation"
 import { LogOut, Menu, X } from "lucide-react"
 import { useState } from "react"
 
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { Button } from "@/src/components/ui/button"
+import { cn } from "@/src/lib/utils"
 
 export default function Header() {
   const pathname = usePathname()

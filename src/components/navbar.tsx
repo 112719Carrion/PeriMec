@@ -4,9 +4,9 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { LogIn, LogOut, Menu, X } from "lucide-react"
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import { useAuth } from "@/context/auth-context"
+import { Button } from "@/src/components/ui/button"
+import { cn } from "@/src/lib/utils"
+import { useAuth } from "@/src/context/auth-context"
 
 export default function Navbar() {
   const pathname = usePathname()
@@ -15,9 +15,10 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
+  // Asegurarse de que la ruta de "Administración" sea correcta
   const navItems = [
     { name: "Inicio", href: "/" },
-    { name: "Peritajes", href: "/peritaje" },
+    { name: "Peritajes", href: "/peritajes" },
     { name: "Administración", href: "/administracion" },
   ]
 

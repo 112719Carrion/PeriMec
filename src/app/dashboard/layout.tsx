@@ -2,8 +2,8 @@
 
 import type React from "react"
 
-import { useAuth } from "@/context/auth-context"
-import AppLayout from "@/components/app-layout"
+import { useAuth } from "@/src/context/auth-context"
+import AppLayout from "@/src/components/app-layout"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 

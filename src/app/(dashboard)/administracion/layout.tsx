@@ -1,5 +1,5 @@
 import type React from "react"
-import AppLayout from "@/components/app-layout"
+import AppLayout from "@/src/components/app-layout"
 
 export default function AdministracionLayout({
   children,

@@ -2,8 +2,8 @@
 
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
-import { supabase } from "@/lib/supabase"
-import type { SupabaseUser } from "@/lib/supabase"
+import { supabase } from "@/src/lib/supabase"
+import type { SupabaseUser } from "@/src/lib/supabase"
 
 // Tipo para el contexto de autenticación
 type AuthContextType = {
