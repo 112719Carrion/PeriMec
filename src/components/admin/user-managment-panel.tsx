@@ -23,6 +23,9 @@ import {
   AlertDialogTitle,
 } from "@/src/components/ui/alert-dialog"
 
+// Importar el nuevo componente
+import SupabaseConfigChecker from "./supabase-config-checker"
+
 export default function UserManagementPanel() {
   const [users, setUsers] = useState<UserData[]>([])
   const [filteredUsers, setFilteredUsers] = useState<UserData[]>([])
@@ -247,9 +250,17 @@ export default function UserManagementPanel() {
             <div className="p-4 text-center">
               <p className="text-red-500 mb-2">Error al cargar usuarios</p>
               <p className="text-sm text-muted-foreground">{error}</p>
-              <Button variant="outline" onClick={loadUsers} className="mt-4">
-                Reintentar
-              </Button>
+              <div className="mt-4 flex flex-col items-center gap-4">
+                <Button variant="outline" onClick={loadUsers}>
+                  Reintentar
+                </Button>
+
+                {error.includes("Error de configuración de Supabase") && (
+                  <div className="mt-4 w-full max-w-md">
+                    <SupabaseConfigChecker />
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
             <div className="rounded-md border">

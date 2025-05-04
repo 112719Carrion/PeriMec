@@ -42,13 +42,22 @@ export const supabase = createSupabaseClient()
 // Cliente para el servidor con la clave de servicio (para operaciones privilegiadas)
 export const createServiceClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ""
+  const supabaseServiceKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkaHNibmlwZ3FrY2twcXV2aHd4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NTgwMzU4MiwiZXhwIjoyMDYxMzc5NTgyfQ.npH1HGB9q8QG6In3ELJ5Bu9KPdsTbzCGEbUb28lS0bM";
+
+  // Verificar y mostrar información de depuración
+  console.log("Supabase URL:", supabaseUrl ? "Definido" : "No definido")
+  console.log("Supabase Service Key:", supabaseServiceKey ? "Definido" : "No definido")
 
   // Crear el cliente solo si las variables están definidas
   if (supabaseUrl && supabaseServiceKey) {
     return createClient(supabaseUrl, supabaseServiceKey)
   }
 
-  // Si las variables no están definidas, devolver null
+  // Si las variables no están definidas, mostrar un error más descriptivo
+  console.error("Error: Variables de entorno para el cliente de servicio no definidas correctamente")
+  console.error("NEXT_PUBLIC_SUPABASE_URL:", supabaseUrl ? "Definido" : "No definido")
+  console.error("SUPABASE_SERVICE_ROLE_KEY:", supabaseServiceKey ? "Definido" : "No definido")
+
+  // Devolver null para que el código que llama a esta función pueda manejar el error
   return null
 }

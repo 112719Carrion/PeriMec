@@ -9,7 +9,10 @@ export async function fetchUsers(): Promise<UserData[]> {
 
     if (!serviceClient) {
       console.error("No se pudo crear el cliente de servicio de Supabase")
-      throw new Error("Error de configuración de Supabase")
+      console.error(
+        "Verifique que las variables de entorno NEXT_PUBLIC_SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY estén configuradas correctamente",
+      )
+      throw new Error("Error de configuración de Supabase: Clave de servicio no disponible")
     }
 
     // Obtener usuarios de auth.users
