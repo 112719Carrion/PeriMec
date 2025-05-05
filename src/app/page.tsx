@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { Button } from "@/src/components/ui/button"
+import { RoleContent } from "../components/role-content"
 
 export default function HomePage() {
   return (
@@ -14,11 +15,15 @@ export default function HomePage() {
               Peritajes
             </Button>
           </Link>
-          <Link href="/administracion" className="w-full">
-            <Button variant="outline" className="w-full">
-              Administración
-            </Button>
-          </Link>
+          
+          <RoleContent allowedRoles={["admin"]}>
+            <Link href="/administracion" className="w-full">
+              <Button variant="outline" className="w-full">
+                Administración
+              </Button>
+            </Link>
+          </RoleContent>
+          
           <Link href="/login" className="w-full">
             <Button className="w-full">Iniciar Sesión</Button>
           </Link>
@@ -30,10 +35,10 @@ export default function HomePage() {
             <p className="text-muted-foreground">Administra todos los peritajes de manera eficiente y organizada.</p>
           </div>
 
-          <div className="bg-card rounded-lg p-6 shadow-sm">
-            <h3 className="text-lg font-medium mb-2">Administración</h3>
-            <p className="text-muted-foreground">Configura usuarios, permisos y parámetros del sistema.</p>
-          </div>
+            <div className="bg-card rounded-lg p-6 shadow-sm" >
+              <h3 className="text-lg font-medium mb-2">Administración</h3>
+              <p className="text-muted-foreground">Configura usuarios, permisos y parámetros del sistema.</p>
+            </div>
 
           <div className="bg-card rounded-lg p-6 shadow-sm">
             <h3 className="text-lg font-medium mb-2">Reportes</h3>

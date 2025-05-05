@@ -5,11 +5,23 @@ import { createContext, useContext, useState, useEffect } from "react"
 import { supabase } from "@/src/lib/supabase"
 import type { SupabaseUser } from "@/src/lib/supabase"
 
+// Tipo para el perfil del usuario
+type UserProfile = {
+  id: string
+  role: "admin" | "perito" | "user"
+  full_name?: string
+  updated_at?: string
+}
+
 // Tipo para el contexto de autenticación
 type AuthContextType = {
   user: SupabaseUser | null
+  profile: UserProfile | null // Añadido: perfil del usuario
   isAuthenticated: boolean
   isLoading: boolean
+  isAdmin: boolean // Añadido: verificación de rol admin
+  isPerito: boolean // Añadido: verificación de rol perito
+  isUser: boolean // Añadido: verificación de rol user
   login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>
   logout: () => Promise<void>
 }
@@ -29,7 +41,29 @@ export function useAuth() {
 // Proveedor del contexto
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<SupabaseUser | null>(null)
+  const [profile, setProfile] = useState<UserProfile | null>(null) // Añadido: estado para el perfil
   const [isLoading, setIsLoading] = useState(true)
+
+  // Función para cargar el perfil del usuario
+  const loadUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, role, full_name, updated_at")
+        .eq("id", userId)
+        .single()
+
+      if (error) {
+        console.error("Error al cargar el perfil:", error)
+        return null
+      }
+
+      return data as UserProfile
+    } catch (error) {
+      console.error("Error inesperado al cargar el perfil:", error)
+      return null
+    }
+  }
 
   // Comprobar la sesión actual al cargar
   useEffect(() => {
@@ -45,6 +79,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Actualizar el estado con el usuario de la sesión
         if (session?.user) {
           setUser(session.user as SupabaseUser)
+          
+          // Cargar el perfil del usuario
+          const userProfile = await loadUserProfile(session.user.id)
+          setProfile(userProfile)
         }
       } catch (error) {
         console.error("Error al obtener la sesión:", error)
@@ -58,8 +96,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Suscribirse a cambios en la autenticación
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser((session?.user as SupabaseUser) || null)
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const currentUser = (session?.user as SupabaseUser) || null
+      setUser(currentUser)
+      
+      // Actualizar el perfil cuando cambia el usuario
+      if (currentUser) {
+        const userProfile = await loadUserProfile(currentUser.id)
+        setProfile(userProfile)
+      } else {
+        setProfile(null)
+      }
+      
       setIsLoading(false)
     })
 
@@ -83,6 +131,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { success: false, message: "Credenciales inválidas" }
       }
 
+      // Cargar el perfil después de iniciar sesión
+      if (data?.user) {
+        const userProfile = await loadUserProfile(data.user.id)
+        setProfile(userProfile)
+      }
+
       return { success: true, user: data?.user || null }
     } catch (error) {
       console.error("Error inesperado al iniciar sesión:", error)
@@ -104,8 +158,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw error
       }
 
-      // Asegurarnos de que el usuario se establece a null
+      // Asegurarnos de que el usuario y el perfil se establecen a null
       setUser(null)
+      setProfile(null)
       console.log("Sesión cerrada correctamente")
     } catch (error) {
       console.error("Error inesperado al cerrar sesión:", error)
@@ -114,10 +169,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  // Verificación de roles basada en el perfil
+  const isAdmin = profile?.role === "admin"
+  const isPerito = profile?.role === "perito"
+  const isUser = profile?.role === "user"
+
+
   const value = {
     user,
+    profile, // Añadido: perfil del usuario
     isAuthenticated: !!user,
     isLoading,
+    isAdmin, // Añadido: verificación de rol admin
+    isPerito, // Añadido: verificación de rol perito
+    isUser, // Añadido: verificación de rol user
     login,
     logout,
   }

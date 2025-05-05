@@ -1,12 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Avatar } from "@/components/ui/avatar"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/src/components/ui/card"
+import { Button } from "@/src/components/ui/button"
+import { Calendar } from "@/src/components/ui/calendar"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/src/components/ui/dialog"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select"
+import { Avatar } from "@/src/components/ui/avatar"
 
 // Tipos de peritaje disponibles
 const tiposPeritaje = [

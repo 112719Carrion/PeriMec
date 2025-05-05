@@ -79,7 +79,7 @@ export async function createUser(userData: CreateUserData): Promise<UserData> {
     if (error) {
       throw error
     }
-
+    
     // Crear el perfil del usuario en la tabla profiles
     const { error: profileError } = await serviceClient.from("profiles").insert({
       id: data.user.id,
@@ -229,3 +229,4 @@ export async function deleteUser(userId: string): Promise<boolean> {
     throw error
   }
 }
+

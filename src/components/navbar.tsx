@@ -14,11 +14,12 @@ export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const { isAdmin, isPerito, isUser } = useAuth()
 
   // Asegurarse de que la ruta de "Administración" sea correcta
   const navItems = [
     { name: "Inicio", href: "/" },
-    { name: "Peritajes", href: "/peritajes" },
+    { name: "Peritajes", href: "/peritaje" },
     { name: "Administración", href: "/administracion" },
   ]
 
@@ -46,24 +47,26 @@ export default function Navbar() {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <span className="font-bold text-xl">Mi Aplicación</span>
+            <span className="font-bold text-xl">PeriMec</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
-            {navItems.map((item) => (
+            <nav className="hidden md:flex items-center space-x-6">
+            {navItems
+              .filter((item) => item.name !== "Administración" || isAdmin)
+              .map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "text-sm font-medium transition-colors hover:text-primary",
-                  pathname === item.href ? "text-primary font-semibold" : "text-muted-foreground",
+                "text-sm font-medium transition-colors hover:text-primary",
+                pathname === item.href ? "text-primary font-semibold" : "text-muted-foreground",
                 )}
               >
                 {item.name}
               </Link>
-            ))}
-          </nav>
+              ))}
+            </nav>
         </div>
 
         {/* Login/Logout Button (Desktop) */}

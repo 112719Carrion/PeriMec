@@ -42,11 +42,9 @@ export const supabase = createSupabaseClient()
 // Cliente para el servidor con la clave de servicio (para operaciones privilegiadas)
 export const createServiceClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
-  const supabaseServiceKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkaHNibmlwZ3FrY2twcXV2aHd4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NTgwMzU4MiwiZXhwIjoyMDYxMzc5NTgyfQ.npH1HGB9q8QG6In3ELJ5Bu9KPdsTbzCGEbUb28lS0bM";
-
-  // Verificar y mostrar información de depuración
-  console.log("Supabase URL:", supabaseUrl ? "Definido" : "No definido")
-  console.log("Supabase Service Key:", supabaseServiceKey ? "Definido" : "No definido")
+  //Error para revisar despues
+  // const supabaseServiceKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkaHNibmlwZ3FrY2twcXV2aHd4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NTgwMzU4MiwiZXhwIjoyMDYxMzc5NTgyfQ.npH1HGB9q8QG6In3ELJ5Bu9KPdsTbzCGEbUb28lS0bM";
+  const supabaseServiceKey = process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY || ""
 
   // Crear el cliente solo si las variables están definidas
   if (supabaseUrl && supabaseServiceKey) {
