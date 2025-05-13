@@ -1,180 +1,193 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/src/components/ui/card"
+import { useRouter } from "next/navigation"
 import { Button } from "@/src/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/src/components/ui/card"
 import { Calendar } from "@/src/components/ui/calendar"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/src/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/src/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select"
-import { Avatar } from "@/src/components/ui/avatar"
-
-// Tipos de peritaje disponibles
-const tiposPeritaje = [
-  {
-    id: "basico",
-    titulo: "Peritaje básico",
-    icono: "A",
-    indicaciones: "Indicaciones del sevicio",
-    descripcion: "en este servicio se busca ver motor",
-    detalles: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
-    imagen: "/car-tire-check.png",
-  },
-  {
-    id: "medio",
-    titulo: "Peritaje medio",
-    icono: "A",
-    indicaciones: "Indicaciones del sevicio",
-    descripcion: "en este servicio se busca ver motor e exterior",
-    detalles: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
-    imagen: "/laboratory-analysis.png",
-  },
-  {
-    id: "detallado",
-    titulo: "Peritaje detallado",
-    icono: "A",
-    indicaciones: "Indicaciones del sevicio",
-    descripcion: "en este servicio se busca ver todo los que tiene el auto",
-    detalles: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
-    imagen: "/vintage-clockwork-mechanism.png",
-  },
-]
-
-// Horarios disponibles para agendar
-const horariosDisponibles = ["09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00"]
+import { format } from "date-fns"
+import { es } from "date-fns/locale"
+import { Clock, CalendarIcon, CheckCircle } from "lucide-react"
 
 export default function NuevoPeritajeView() {
+  const router = useRouter()
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
-  const [selectedTime, setSelectedTime] = useState<string>("")
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [selectedPeritaje, setSelectedPeritaje] = useState<string | null>(null)
-  const [confirmationOpen, setConfirmationOpen] = useState(false)
+  const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined)
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false)
 
-  // Función para abrir el diálogo de calendario
-  const handleAgendarTurno = (peritajeId: string) => {
-    setSelectedPeritaje(peritajeId)
-    setDialogOpen(true)
+  // Horarios disponibles (se podrían cargar desde la base de datos)
+  const availableTimes = [
+    "09:00",
+    "09:30",
+    "10:00",
+    "10:30",
+    "11:00",
+    "11:30",
+    "12:00",
+    "12:30",
+    "13:00",
+    "13:30",
+    "14:00",
+    "14:30",
+    "15:00",
+    "15:30",
+    "16:00",
+    "16:30",
+    "17:00",
+    "17:30",
+  ]
+
+  const handleAgendarTurno = () => {
+    setIsCalendarOpen(true)
   }
 
-  // Función para confirmar la reserva
-  const handleConfirmarReserva = () => {
-    if (selectedDate && selectedTime) {
-      setDialogOpen(false)
-      setConfirmationOpen(true)
-      // Aquí se podría implementar la lógica para guardar la reserva en la base de datos
-    }
+  const handleDateSelect = (date: Date | undefined) => {
+    setSelectedDate(date)
+  }
+
+  const handleTimeSelect = (time: string) => {
+    setSelectedTime(time)
+  }
+
+  const handleConfirmAppointment = () => {
+    setIsCalendarOpen(false)
+    setIsConfirmationOpen(true)
+  }
+
+  const handleContinueToForm = () => {
+    // Convertir la fecha y hora seleccionadas a un formato que podamos pasar en la URL
+    const dateString = selectedDate ? format(selectedDate, "yyyy-MM-dd") : ""
+    const timeString = selectedTime || ""
+
+    // Redirigir al formulario de peritaje con la fecha y hora como parámetros
+    router.push(`/peritaje/formulario?fecha=${dateString}&hora=${timeString}`)
+  }
+
+  // Función para deshabilitar días pasados y fines de semana
+  const disabledDays = (date: Date) => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    // Deshabilitar días pasados
+    if (date < today) return true
+
+    // Deshabilitar fines de semana (0 = domingo, 6 = sábado)
+    const day = date.getDay()
+    return day === 0 || day === 6
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Nuevo Peritaje</h1>
-      </div>
-      <div className="border-b pb-2">
-        <p className="text-muted-foreground">Seleccione el tipo de peritaje que desea realizar y agende un turno.</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {tiposPeritaje.map((peritaje) => (
-          <Card key={peritaje.id} className="overflow-hidden">
-            <CardHeader className="bg-muted/30 flex flex-row items-center gap-3 pb-2">
-              <Avatar className="h-8 w-8 bg-primary/20 text-primary">
-                <span>{peritaje.icono}</span>
-              </Avatar>
-              <CardTitle className="text-lg">{peritaje.titulo}</CardTitle>
-            </CardHeader>
-            <div className="aspect-video bg-muted/50 flex items-center justify-center">
-              <img
-                src={peritaje.imagen || "/placeholder.svg"}
-                alt={peritaje.titulo}
-                className="object-cover w-full h-full"
-              />
+    <div className="container mx-auto py-6">
+      <Card className="w-full max-w-4xl mx-auto">
+        <CardHeader>
+          <CardTitle className="text-2xl">Nuevo Peritaje</CardTitle>
+          <CardDescription>Agenda un turno para realizar el peritaje de un vehículo</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <div className="space-y-6">
+            <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 text-black">
+              <h3 className="text-lg font-medium mb-4">Información importante</h3>
+              <ul className="list-disc pl-5 space-y-2">
+              <li>El peritaje tiene una duración aproximada de 1 hora</li>
+              <li>Debe presentarse con el vehículo limpio para una mejor evaluación</li>
+              <li>Traiga toda la documentación del vehículo</li>
+              <li>En caso de no poder asistir, cancele el turno con 24 horas de anticipación</li>
+              </ul>
             </div>
-            <CardContent className="pt-4">
-              <h3 className="font-medium">{peritaje.indicaciones}</h3>
-              <p className="text-sm text-muted-foreground">{peritaje.descripcion}</p>
-              <p className="mt-2 text-sm">{peritaje.detalles}</p>
-            </CardContent>
-            <CardFooter>
-              <Button className="w-full" onClick={() => handleAgendarTurno(peritaje.id)}>
-                Agendar turno
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
+            </div>
+        </CardContent>
+        <CardFooter className="flex justify-end">
+          <Button onClick={handleAgendarTurno}>
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            Agendar turno
+          </Button>
+        </CardFooter>
+      </Card>
 
       {/* Diálogo para seleccionar fecha y hora */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Agendar turno</DialogTitle>
+            <DialogTitle>Agendar turno para peritaje</DialogTitle>
+            <DialogDescription>Seleccione la fecha y hora para realizar el peritaje</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="flex flex-col items-center space-y-4">
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <label className="text-sm font-medium">Fecha</label>
               <Calendar
                 mode="single"
                 selected={selectedDate}
-                onSelect={setSelectedDate}
+                onSelect={handleDateSelect}
+                disabled={disabledDays}
+                locale={es}
                 className="rounded-md border"
-                disabled={(date) => {
-                  // Deshabilitar fechas pasadas y fines de semana
-                  const today = new Date()
-                  today.setHours(0, 0, 0, 0)
-                  const day = date.getDay()
-                  return date < today || day === 0 || day === 6
-                }}
               />
-              <div className="w-full space-y-2">
-                <label className="text-sm font-medium">Seleccione un horario:</label>
-                <Select value={selectedTime} onValueChange={setSelectedTime}>
+            </div>
+
+            {selectedDate && (
+              <div className="grid gap-2">
+                <label className="text-sm font-medium">Hora</label>
+                <Select onValueChange={handleTimeSelect} value={selectedTime}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar horario" />
+                    <SelectValue placeholder="Seleccione un horario" />
                   </SelectTrigger>
                   <SelectContent>
-                    {horariosDisponibles.map((horario) => (
-                      <SelectItem key={horario} value={horario}>
-                        {horario}
+                    {availableTimes.map((time) => (
+                      <SelectItem key={time} value={time}>
+                        {time}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-            </div>
+            )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setIsCalendarOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleConfirmarReserva} disabled={!selectedDate || !selectedTime}>
-              Confirmar reserva
+            <Button onClick={handleConfirmAppointment} disabled={!selectedDate || !selectedTime}>
+              Confirmar
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Diálogo de confirmación */}
-      <Dialog open={confirmationOpen} onOpenChange={setConfirmationOpen}>
+      <Dialog open={isConfirmationOpen} onOpenChange={setIsConfirmationOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Reserva confirmada</DialogTitle>
+            <DialogTitle>Turno agendado</DialogTitle>
+            <DialogDescription>Su turno ha sido agendado correctamente</DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <p>Su peritaje ha sido agendado correctamente para:</p>
-            <div className="mt-2 p-4 bg-muted rounded-md">
-              <p className="font-medium">
-                {selectedDate?.toLocaleDateString("es-ES", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
+            <div className="flex items-center justify-center mb-4">
+              <CheckCircle className="h-16 w-16 text-green-500" />
+            </div>
+            <div className="text-center space-y-2">
+              <p className="font-medium">Detalles del turno:</p>
+              <p className="flex items-center justify-center">
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {selectedDate && format(selectedDate, "EEEE d 'de' MMMM 'de' yyyy", { locale: es })}
               </p>
-              <p>Hora: {selectedTime}</p>
-              <p className="mt-2">Tipo: {tiposPeritaje.find((p) => p.id === selectedPeritaje)?.titulo}</p>
+              <p className="flex items-center justify-center">
+                <Clock className="mr-2 h-4 w-4" />
+                {selectedTime} hs
+              </p>
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={() => setConfirmationOpen(false)}>Aceptar</Button>
+            <Button onClick={handleContinueToForm}>Continuar al formulario</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

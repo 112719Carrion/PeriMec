@@ -10,18 +10,34 @@ export type SupabaseUser = {
   }
 }
 
-// Función para crear el cliente de Supabase
+// Variable para almacenar la instancia única del cliente
+let supabaseInstance: ReturnType<typeof createClient> | null = null
+let serviceClientInstance: ReturnType<typeof createClient> | null = null
+
+// Función para crear el cliente de Supabase (patrón singleton)
 const createSupabaseClient = () => {
+  // Si ya existe una instancia, la devolvemos
+  if (supabaseInstance) {
+    return supabaseInstance
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
 
   // Crear el cliente solo si las variables están definidas
   if (supabaseUrl && supabaseAnonKey) {
-    return createClient(supabaseUrl, supabaseAnonKey)
+    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        storageKey: "supabase-auth", // Clave única para el almacenamiento
+      },
+    })
+    return supabaseInstance
   }
 
   // Si las variables no están definidas, devolver un objeto con métodos vacíos
   // para evitar errores en tiempo de ejecución
+  console.warn("Variables de entorno de Supabase no configuradas correctamente")
   return {
     auth: {
       getSession: async () => ({ data: { session: null }, error: null }),
@@ -41,14 +57,36 @@ export const supabase = createSupabaseClient()
 
 // Cliente para el servidor con la clave de servicio (para operaciones privilegiadas)
 export const createServiceClient = () => {
+  // Si ya existe una instancia, la devolvemos (solo en el servidor)
+  if (typeof window === "undefined" && serviceClientInstance) {
+    return serviceClientInstance
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
-  //Error para revisar despues
-  // const supabaseServiceKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkaHNibmlwZ3FrY2twcXV2aHd4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NTgwMzU4MiwiZXhwIjoyMDYxMzc5NTgyfQ.npH1HGB9q8QG6In3ELJ5Bu9KPdsTbzCGEbUb28lS0bM";
   const supabaseServiceKey = process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY || ""
+
+  // Verificar y mostrar información de depuración
+  console.log("Supabase URL:", supabaseUrl ? "Definido" : "No definido")
+  console.log("Supabase Service Key:", supabaseServiceKey ? "Definido" : "No definido")
 
   // Crear el cliente solo si las variables están definidas
   if (supabaseUrl && supabaseServiceKey) {
-    return createClient(supabaseUrl, supabaseServiceKey)
+    // En el servidor, podemos almacenar la instancia
+    if (typeof window === "undefined") {
+      serviceClientInstance = createClient(supabaseUrl, supabaseServiceKey, {
+        auth: {
+          persistSession: false, // No necesitamos persistir la sesión para el cliente de servicio
+        },
+      })
+      return serviceClientInstance
+    }
+
+    // En el cliente, creamos una nueva instancia cada vez (no debería ocurrir)
+    return createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        persistSession: false,
+      },
+    })
   }
 
   // Si las variables no están definidas, mostrar un error más descriptivo
