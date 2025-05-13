@@ -12,14 +12,12 @@ type RoleContentProps = {
 export function RoleContent({ children, allowedRoles }: RoleContentProps) {
   const { isAdmin, isPerito, isUser } = useAuth()
   
-  console.log("isAdmin:", isAdmin)
   // Verificar si el usuario tiene alguno de los roles permitidos
   const hasAccess = (
     (isAdmin && allowedRoles.includes("admin")) ||
     (isPerito && allowedRoles.includes("perito")) ||
     (isUser && allowedRoles.includes("user"))
   )
-  console.log("hasAccess:", hasAccess)
   
   // Si tiene acceso, mostrar el contenido
   if (hasAccess) {
