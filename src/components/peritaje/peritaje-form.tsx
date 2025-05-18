@@ -1,8 +1,6 @@
-"use client"
-
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { format, parse } from "date-fns"
+import { useState, useTransition } from "react"
+import { redirect, useRouter } from "next/navigation"
+import { format, parse, parseISO } from "date-fns"
 import { es } from "date-fns/locale"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -11,11 +9,12 @@ import { Button } from "@/src/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/src/components/ui/form"
 import { Input } from "@/src/components/ui/input"
-import { Calendar, Clock, AlertCircle, CheckCircle } from "lucide-react"
+import { Calendar, Clock, AlertCircle, CheckCircle, Loader2 } from "lucide-react"
 import { createPeritaje } from "@/src/lib/peritajes/peritaje"
 import { useToast } from "@/src/hooks/use-toast"
 import { Alert, AlertDescription, AlertTitle } from "@/src/components/ui/alert"
-import { Switch } from "@/src/components/ui/switch"
+import api from "@/src/api"
+import { redirectMP } from "@/src/app/actions/peritaje"
 
 // Esquema de validación para el formulario
 // Solo los campos del propietario son obligatorios
@@ -35,17 +34,24 @@ interface PeritajeFormProps {
   }
 }
 
+// Tipos para el estado del pago
+type PaymentStatus = "pending" | "processing" | "approved" | "rejected"
+
 export default function PeritajeForm({ appointmentDetails }: PeritajeFormProps) {
   const router = useRouter()
   const { toast } = useToast()
+  const [isPending, start] = useTransition();
+
+  // **Aquí**: estado local
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>("pending")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState<FormValues | null>(null)
-  const [paso, setPaso] = useState(false) // Estado para controlar la bandera "Paso"
-  const [showPaymentConfirmation, setShowPaymentConfirmation] = useState(false) // Estado para mostrar la confirmación de pago
+  const [showPaymentConfirmation, setShowPaymentConfirmation] = useState(false)
+  const [paymentId, setPaymentId] = useState<string | null>(null)
 
-  // Formatear la fecha para mostrarla
+  // Formateo determinista usando parseISO
   const formattedDate = appointmentDetails.fecha
-    ? format(parse(appointmentDetails.fecha, "yyyy-MM-dd", new Date()), "EEEE d 'de' MMMM 'de' yyyy", { locale: es })
+    ? format(parseISO(appointmentDetails.fecha), "EEEE d 'de' MMMM 'de' yyyy", { locale: es })
     : ""
 
   // Inicializar el formulario
@@ -64,23 +70,42 @@ export default function PeritajeForm({ appointmentDetails }: PeritajeFormProps) 
     setShowPaymentConfirmation(true) // Mostrar la confirmación de pago
   }
 
+  const handlePago = () => {
+    start(() => {
+      // Llama a la Server Action; el mensaje lo pasas aquí:
+      redirectMP("Peritaje de auto");
+    });
+  };
+
+  // Función para crear el pago - AQUÍ ES DONDE SE IMPLEMENTARÁ EL PAGO REAL
+  const PaymentCreate = async () => {
+    if (!formData) return
+
+    setPaymentStatus("processing")
+    setIsSubmitting(true)
+
+    try {
+        handlePago();
+
+        
+        // processPaymentAndSave();
+    } catch (error) {
+      console.error("Error al procesar el pago:", error)
+      setPaymentStatus("rejected")
+      toast({
+        title: "Error en el pago",
+        description: "Ocurrió un error al procesar el pago. Por favor, intente nuevamente.",
+        variant: "destructive",
+      })
+      setIsSubmitting(false)
+    }
+  }
+
   // Función para procesar el pago y guardar en la base de datos
   const processPaymentAndSave = async () => {
     if (!formData) return
 
-    setIsSubmitting(true)
     try {
-      // Verificar si el paso es true antes de guardar en la base de datos
-      if (!paso) {
-        toast({
-          title: "Pago pendiente",
-          description: "El pago debe ser confirmado antes de continuar.",
-          variant: "destructive",
-        })
-        setIsSubmitting(false)
-        return
-      }
-
       // Crear el objeto de peritaje con los datos del formulario y la cita
       const peritajeData = {
         // Datos del propietario del formulario
@@ -98,6 +123,9 @@ export default function PeritajeForm({ appointmentDetails }: PeritajeFormProps) 
         fecha_turno: appointmentDetails.fecha,
         hora_turno: appointmentDetails.hora,
         estado: "pendiente",
+        // Datos del pago (opcional)
+        payment_id: paymentId,
+        payment_status: "approved",
       }
 
       // Llamar a la función para crear el peritaje en la base de datos
@@ -137,17 +165,6 @@ export default function PeritajeForm({ appointmentDetails }: PeritajeFormProps) 
     }
   }
 
-  // Función para simular el pago (para pruebas)
-  const handlePaymentSimulation = (checked: boolean) => {
-    setPaso(checked)
-    if (checked) {
-      toast({
-        title: "Pago confirmado",
-        description: "El pago ha sido confirmado correctamente.",
-      })
-    }
-  }
-
   return (
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
@@ -184,41 +201,77 @@ export default function PeritajeForm({ appointmentDetails }: PeritajeFormProps) 
 
         {showPaymentConfirmation ? (
           <div className="space-y-6">
-            <Alert className="bg-yellow-50 border-yellow-200">
-              <AlertCircle className="h-4 w-4 text-yellow-600" />
-              <AlertTitle className="text-yellow-800">Confirmación de pago</AlertTitle>
-              <AlertDescription className="text-yellow-700">
-                Para continuar con la reserva del turno, debe confirmar el pago de $1000.
-              </AlertDescription>
-            </Alert>
+            {paymentStatus === "pending" && (
+              <Alert className="bg-yellow-50 border-yellow-200">
+                <AlertCircle className="h-4 w-4 text-yellow-600" />
+                <AlertTitle className="text-yellow-800">Confirmación de pago</AlertTitle>
+                <AlertDescription className="text-yellow-700">
+                  Para continuar con la reserva del turno, debe realizar el pago de $1000.
+                </AlertDescription>
+              </Alert>
+            )}
 
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div>
-                <h3 className="font-medium">Simular pago completado</h3>
-                <p className="text-sm text-muted-foreground">
-                  (Esta opción es solo para pruebas y será reemplazada por el proceso de pago real)
-                </p>
-              </div>
-              <Switch checked={paso} onCheckedChange={handlePaymentSimulation} />
-            </div>
+            {paymentStatus === "processing" && (
+              <Alert className="bg-blue-50 border-blue-200">
+                <Loader2 className="h-4 w-4 text-blue-600 animate-spin" />
+                <AlertTitle className="text-blue-800">Procesando pago</AlertTitle>
+                <AlertDescription className="text-blue-700">
+                  Su pago está siendo procesado. Por favor espere un momento.
+                </AlertDescription>
+              </Alert>
+            )}
 
-            {paso && (
+            {paymentStatus === "approved" && (
               <Alert className="bg-green-50 border-green-200">
                 <CheckCircle className="h-4 w-4 text-green-600" />
-                <AlertTitle className="text-green-800">Pago confirmado</AlertTitle>
+                <AlertTitle className="text-green-800">Pago aprobado</AlertTitle>
                 <AlertDescription className="text-green-700">
-                  El pago ha sido confirmado. Puede continuar con la reserva del turno.
+                  El pago ha sido aprobado. Su turno ha sido reservado correctamente.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {paymentStatus === "rejected" && (
+              <Alert className="bg-red-50 border-red-200">
+                <AlertCircle className="h-4 w-4 text-red-600" />
+                <AlertTitle className="text-red-800">Pago rechazado</AlertTitle>
+                <AlertDescription className="text-red-700">
+                  El pago ha sido rechazado. Por favor, intente nuevamente con otro método de pago.
                 </AlertDescription>
               </Alert>
             )}
 
             <div className="flex justify-between">
-              <Button variant="outline" onClick={() => setShowPaymentConfirmation(false)}>
-                Volver al formulario
-              </Button>
-              <Button onClick={processPaymentAndSave} disabled={isSubmitting || !paso}>
-                {isSubmitting ? "Guardando..." : "Confirmar reserva"}
-              </Button>
+              {paymentStatus !== "approved" && (
+                <Button variant="outline" onClick={() => setShowPaymentConfirmation(false)}>
+                  Volver al formulario
+                </Button>
+              )}
+
+              {paymentStatus === "pending" && (
+                <Button onClick={PaymentCreate} disabled={isSubmitting}>
+                  Proceder al pago
+                </Button>
+              )}
+
+              {paymentStatus === "processing" && (
+                <Button disabled={true}>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Procesando...
+                </Button>
+              )}
+
+              {paymentStatus === "approved" && (
+                <Button onClick={() => router.push("/peritaje/informes")} disabled={isSubmitting}>
+                  Ver mis peritajes
+                </Button>
+              )}
+
+              {paymentStatus === "rejected" && (
+                <Button onClick={PaymentCreate} disabled={isSubmitting}>
+                  Intentar nuevamente
+                </Button>
+              )}
             </div>
           </div>
         ) : (

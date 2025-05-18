@@ -19,4 +19,5 @@ export async function POST(request: Request, res: Response) {
     if (error) {
         return new Response(JSON.stringify({error}), {status: 500});
     }
+    return Response.json({success: true});
 }

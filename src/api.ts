@@ -1,5 +1,5 @@
-import {readFileSync, writeFileSync} from "node:fs";
 
+import { readFileSync, writeFileSync } from "fs";
 import {MercadoPagoConfig, Preference} from "mercadopago";
 
 interface Message {
@@ -7,11 +7,11 @@ interface Message {
   text: string;
 }
 
-export const mercadopago = new MercadoPagoConfig({accessToken: process.env.MP_ACCESS_TOKEN!});
+export const mercadopago = new MercadoPagoConfig({accessToken: process.env.NEXT_PUBLIC_MERCADO_PAGO_ACCESS_TOKEN!});
 
 const api = {
   message: {
-    async list(): Promise<Message[]> {
+        async list(): Promise<Message[]> {
       // Leemos el archivo de la base de datos de los mensajes
       const db = readFileSync("db/message.db");
 
@@ -34,13 +34,15 @@ const api = {
       writeFileSync("db/message.db", JSON.stringify(draft, null, 2));
     },
     async submit(text: Message["text"]) {
+
+      console.log(text);
       // Creamos la preferencia incluyendo el precio, titulo y metadata. La información de `items` es standard de Mercado Pago. La información que nosotros necesitamos para nuestra DB debería vivir en `metadata`.
       const preference = await new Preference(mercadopago).create({
         body: {
           items: [
             {
               id: "message",
-              unit_price: 1000,
+              unit_price: 100,
               quantity: 1,
               title: "Mensaje de muro",
             },

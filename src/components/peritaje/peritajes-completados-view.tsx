@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent } from "@/src/components/ui/dialog"
 import { Pencil, FileText, RefreshCw, Download } from "lucide-react"
 import { fetchPeritajesCompletados } from "@/src/lib/peritajes/peritaje"
+import { generatePeritajePDF } from "@/src/lib/pdf/generate-pdf"
 import { useToast } from "@/src/hooks/use-toast"
 import PeritajeFormCompleto from "./peritaje-form-completo"
 import type { PeritajeData } from "@/src/lib/peritajes/peritaje"
@@ -21,6 +22,7 @@ export default function PeritajesCompletadosView() {
   const [loading, setLoading] = useState(true)
   const [selectedPeritaje, setSelectedPeritaje] = useState<PeritajeData | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
+  const [generatingPDF, setGeneratingPDF] = useState<string | null>(null)
 
   // Cargar los peritajes completados
   const loadPeritajes = async () => {
@@ -66,6 +68,36 @@ export default function PeritajesCompletadosView() {
       title: "Peritaje actualizado",
       description: "El peritaje ha sido actualizado correctamente",
     })
+  }
+
+  // Generar y descargar el PDF del peritaje
+  const handleDownloadPDF = async (peritaje: PeritajeData) => {
+    try {
+      setGeneratingPDF(peritaje.id)
+
+      // Importar dinámicamente las bibliotecas para reducir el tamaño del bundle inicial
+      const [jsPDFModule, autoTableModule] = await Promise.all([
+        import("jspdf").then((module) => module.default),
+        import("jspdf-autotable").then((module) => module.default),
+      ])
+
+      // Generar el PDF
+      generatePeritajePDF(peritaje)
+
+      toast({
+        title: "PDF generado",
+        description: "El informe de peritaje ha sido generado y descargado correctamente",
+      })
+    } catch (error) {
+      console.error("Error al generar el PDF:", error)
+      toast({
+        title: "Error",
+        description: "Ocurrió un error al generar el PDF. Intente nuevamente.",
+        variant: "destructive",
+      })
+    } finally {
+      setGeneratingPDF(null)
+    }
   }
 
   // Formatear la fecha para mostrarla
@@ -141,14 +173,10 @@ export default function PeritajesCompletadosView() {
                         size="sm"
                         className="h-8 w-8 p-0"
                         title="Descargar informe"
-                        onClick={() => {
-                          toast({
-                            title: "Función en desarrollo",
-                            description: "La descarga de informes estará disponible próximamente",
-                          })
-                        }}
+                        onClick={() => handleDownloadPDF(peritaje)}
+                        disabled={generatingPDF === peritaje.id}
                       >
-                        <Download className="h-4 w-4" />
+                        <Download className={`h-4 w-4 ${generatingPDF === peritaje.id ? "animate-spin" : ""}`} />
                         <span className="sr-only">Descargar</span>
                       </Button>
                     </TableCell>
