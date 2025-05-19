@@ -1,5 +1,3 @@
-
-import { readFileSync, writeFileSync } from "fs";
 import {MercadoPagoConfig, Preference} from "mercadopago";
 
 interface Message {
@@ -11,47 +9,24 @@ export const mercadopago = new MercadoPagoConfig({accessToken: process.env.NEXT_
 
 const api = {
   message: {
-        async list(): Promise<Message[]> {
-      // Leemos el archivo de la base de datos de los mensajes
-      const db = readFileSync("db/message.db");
-
-      // Devolvemos los datos como un array de objetos
-      return JSON.parse(db.toString());
-    },
-    async add(message: Message): Promise<void> {
-      // Obtenemos los mensajes
-      const db = await api.message.list();
-
-      // Si ya existe un mensaje con ese id, lanzamos un error
-      if (db.some((_message) => _message.id === message.id)) {
-        throw new Error("Message already added");
-      }
-
-      // Agregamos el nuevo mensaje
-      const draft = db.concat(message);
-
-      // Guardamos los datos
-      writeFileSync("db/message.db", JSON.stringify(draft, null, 2));
-    },
     async submit(text: Message["text"]) {
 
-      console.log(text);
       // Creamos la preferencia incluyendo el precio, titulo y metadata. La información de `items` es standard de Mercado Pago. La información que nosotros necesitamos para nuestra DB debería vivir en `metadata`.
       const preference = await new Preference(mercadopago).create({
         body: {
           items: [
             {
               id: "message",
-              unit_price: 100,
+              unit_price: 1000,
               quantity: 1,
               title: "Peritaje automotriz",
               description: "Peritaje automotriz",
             },
           ],
           "back_urls": {
-          "success": "https://http://localhost:3000/",
-          "pending": "https://http://localhost:3000/",
-          "failure": "https://http://localhost:3000/"
+          "success": "https://localhost:3000/",
+          "pending": "https://localhost:3000/",
+          "failure": "https://localhost:3000/"
           },
           "auto_return": "approved",
           metadata: {

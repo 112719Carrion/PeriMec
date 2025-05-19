@@ -128,15 +128,6 @@ export default function PeritajeForm({ appointmentDetails }: PeritajeFormProps) 
         payment_status: "approved",
       }
 
-      // Llamar a la función para crear el peritaje en la base de datos
-      await createPeritaje(peritajeData)
-
-      // Mostrar mensaje de éxito
-      toast({
-        title: "Peritaje agendado",
-        description: "El peritaje ha sido agendado correctamente",
-      })
-
       // Enviar el email de confirmación
       await fetch("/api/email", {
         method: "POST",
@@ -149,6 +140,15 @@ export default function PeritajeForm({ appointmentDetails }: PeritajeFormProps) 
           fecha: appointmentDetails.fecha,
           hora: appointmentDetails.hora,
         }),
+      })
+
+      // Llamar a la función para crear el peritaje en la base de datos
+      await createPeritaje(peritajeData)
+
+      // Mostrar mensaje de éxito
+      toast({
+        title: "Peritaje agendado",
+        description: "El peritaje ha sido agendado correctamente",
       })
 
       // Redirigir a la página de peritajes

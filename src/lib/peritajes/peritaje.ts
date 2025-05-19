@@ -194,6 +194,17 @@ export async function updatePeritaje(id: string, peritajeData: Partial<PeritajeD
       throw new Error("Error de configuración de Supabase")
     }
 
+    // Obtener el peritaje anterior para verificar si el estado ha cambiado
+    const { data: prevPeritaje, error: fetchError } = await supabase
+      .from("peritajes")
+      .select("estado")
+      .eq("id", id)
+      .single()
+
+    if (fetchError) {
+      console.error(`Error al obtener estado anterior del peritaje con ID ${id}:`, fetchError)
+    }
+
     // Actualizar el peritaje
     const { data, error } = await supabase
       .from("peritajes")
@@ -232,6 +243,31 @@ export async function updatePeritaje(id: string, peritajeData: Partial<PeritajeD
     }
 
     console.log(`Peritaje actualizado:`, data)
+
+    // Verificar si el estado cambió a "completado"
+    const updatedPeritaje = data[0]
+    const estadoAnterior = prevPeritaje?.estado
+
+    if (updatedPeritaje && updatedPeritaje.estado === "completado" && estadoAnterior !== "completado") {
+      try {
+        // Enviar correo de notificación
+        await fetch("/api/email", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: updatedPeritaje.email_propietario,
+            peritaje: updatedPeritaje,
+          }),
+        })
+        console.log(`Correo de notificación enviado a ${updatedPeritaje.email_propietario}`)
+      } catch (emailError) {
+        console.error("Error al enviar correo de notificación:", emailError)
+        // No interrumpimos el flujo principal si hay error en el envío del correo
+      }
+    }
+
     return data[0]
   } catch (error: any) {
     console.error("Error en updatePeritaje:", error)

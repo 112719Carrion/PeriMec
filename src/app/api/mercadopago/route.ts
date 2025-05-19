@@ -29,6 +29,20 @@ export async function POST(request: Request) {
     console.log("PAGO:", payment);
     await supabase.from("payments").insert(donation);
 
+    // // Enviar el email de confirmación
+    // await fetch("/api/email", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({
+    //     email: payment.payer?.email ?? "",
+    //     userFirstname: payment.payer?.email,
+    //     fecha: payment.payer?.email,
+    //     hora: payment.metadata,
+    //   }),
+    // })
+
     // Revalidamos la página de inicio para mostrar los datos actualizados
     revalidatePath("/");
   }
