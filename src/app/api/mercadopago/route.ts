@@ -1,9 +1,6 @@
-import type {NextRequest} from "next/server";
-
 import {MercadoPagoConfig, Payment} from "mercadopago";
 import {createClient} from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
-import api from "@/src/api";
 
 const mercadopago = new MercadoPagoConfig({accessToken: process.env.NEXT_PUBLIC_MERCADO_PAGO_ACCESS_TOKEN!});
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY!);

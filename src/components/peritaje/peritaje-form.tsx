@@ -150,9 +150,6 @@ export default function PeritajeForm({ appointmentDetails }: PeritajeFormProps) 
         title: "Peritaje agendado",
         description: "El peritaje ha sido agendado correctamente",
       })
-
-      // Redirigir a la página de peritajes
-      router.push("/peritaje/informes")
     } catch (error) {
       console.error("Error al crear el peritaje:", error)
       toast({
