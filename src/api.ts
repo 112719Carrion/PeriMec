@@ -44,9 +44,16 @@ const api = {
               id: "message",
               unit_price: 100,
               quantity: 1,
-              title: "Mensaje de muro",
+              title: "Peritaje automotriz",
+              description: "Peritaje automotriz",
             },
           ],
+          "back_urls": {
+          "success": "https://http://localhost:3000/",
+          "pending": "https://http://localhost:3000/",
+          "failure": "https://http://localhost:3000/"
+          },
+          "auto_return": "approved",
           metadata: {
             text,
           },

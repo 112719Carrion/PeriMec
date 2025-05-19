@@ -12,17 +12,23 @@ import { Pencil, FileText, RefreshCw, Download } from "lucide-react"
 import { fetchPeritajesCompletados } from "@/src/lib/peritajes/peritaje"
 import { generatePeritajePDF } from "@/src/lib/pdf/generate-pdf"
 import { useToast } from "@/src/hooks/use-toast"
-import PeritajeFormCompleto from "./peritaje-form-completo"
-import type { PeritajeData } from "@/src/lib/peritajes/peritaje"
+import type { PeritajeForPDF } from "@/src/lib/pdf/generate-pdf"
+import PeritajeCompletoView from "./peritaje-completo-view"
 
 export default function PeritajesCompletadosView() {
   const router = useRouter()
   const { toast } = useToast()
-  const [peritajes, setPeritajes] = useState<PeritajeData[]>([])
+  const [peritajes, setPeritajes] = useState<PeritajeForPDF[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedPeritaje, setSelectedPeritaje] = useState<PeritajeData | null>(null)
-  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [selectedPeritaje, setSelectedPeritaje] = useState<PeritajeForPDF | null>(null)
+  const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [generatingPDF, setGeneratingPDF] = useState<string | null>(null)
+  const [isClient, setIsClient] = useState(false)
+
+  // Establecer isClient a true cuando el componente se monte
+  useEffect(() => {
+    setIsClient(true) 
+  }, [])
 
   // Cargar los peritajes completados
   const loadPeritajes = async () => {
@@ -44,46 +50,28 @@ export default function PeritajesCompletadosView() {
 
   // Cargar los peritajes al montar el componente
   useEffect(() => {
-    loadPeritajes()
-  }, [])
+    if (isClient) {
+      loadPeritajes()
+    }
+  }, [isClient])
 
-  // Abrir el formulario de edición
-  const handleEditPeritaje = (peritaje: PeritajeData) => {
+  // Abrir la vista detallada del peritaje
+  const handleViewPeritaje = (peritaje: PeritajeForPDF) => {
     setSelectedPeritaje(peritaje)
-    setIsFormOpen(true)
+    setIsDetailOpen(true)
   }
 
-  // Cerrar el formulario de edición
-  const handleCloseForm = () => {
-    setIsFormOpen(false)
+  // Cerrar la vista detallada
+  const handleCloseDetail = () => {
+    setIsDetailOpen(false)
     setSelectedPeritaje(null)
-  }
-
-  // Manejar la actualización exitosa de un peritaje
-  const handlePeritajeUpdated = () => {
-    loadPeritajes() // Recargar la lista de peritajes
-    setIsFormOpen(false)
-    setSelectedPeritaje(null)
-    toast({
-      title: "Peritaje actualizado",
-      description: "El peritaje ha sido actualizado correctamente",
-    })
   }
 
   // Generar y descargar el PDF del peritaje
-  const handleDownloadPDF = async (peritaje: PeritajeData) => {
+  const handleDownloadPDF = async (peritaje: PeritajeForPDF) => {
     try {
       setGeneratingPDF(peritaje.id)
-
-      // Importar dinámicamente las bibliotecas para reducir el tamaño del bundle inicial
-      const [jsPDFModule, autoTableModule] = await Promise.all([
-        import("jspdf").then((module) => module.default),
-        import("jspdf-autotable").then((module) => module.default),
-      ])
-
-      // Generar el PDF
-      generatePeritajePDF(peritaje)
-
+      await generatePeritajePDF(peritaje)
       toast({
         title: "PDF generado",
         description: "El informe de peritaje ha sido generado y descargado correctamente",
@@ -107,6 +95,24 @@ export default function PeritajesCompletadosView() {
     } catch (error) {
       return dateString
     }
+  }
+
+  // Si no estamos en el cliente, mostrar un esqueleto
+  if (!isClient) {
+    return (
+      <div className="container mx-auto py-6">
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle className="text-2xl">Peritajes Completados</CardTitle>
+            <CardDescription>Cargando...</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-8 bg-gray-200 animate-pulse rounded mb-4"></div>
+            <div className="h-8 bg-gray-200 animate-pulse rounded"></div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
@@ -145,7 +151,7 @@ export default function PeritajesCompletadosView() {
               <TableBody>
                 {peritajes.map((peritaje) => (
                   <TableRow key={peritaje.id}>
-                    <TableCell>{formatDate(peritaje.fecha_turno)}</TableCell>
+                    <TableCell>{formatDate(peritaje.fecha_turno as string)}</TableCell>
                     <TableCell>{peritaje.hora_turno}</TableCell>
                     <TableCell>{peritaje.nombre_propietario}</TableCell>
                     <TableCell>
@@ -159,14 +165,14 @@ export default function PeritajesCompletadosView() {
                     </TableCell>
                     <TableCell className="text-right">
                       <Button
-                        onClick={() => handleEditPeritaje(peritaje)}
+                        onClick={() => handleViewPeritaje(peritaje)}
                         variant="ghost"
                         size="sm"
                         className="h-8 w-8 p-0 mr-2"
-                        title="Editar peritaje"
+                        title="Ver detalles"
                       >
                         <Pencil className="h-4 w-4" />
-                        <span className="sr-only">Editar</span>
+                        <span className="sr-only">Ver detalles</span>
                       </Button>
                       <Button
                         variant="ghost"
@@ -188,16 +194,10 @@ export default function PeritajesCompletadosView() {
         </CardContent>
       </Card>
 
-      {/* Diálogo con el formulario completo */}
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="sm:max-w-[900px]">
-          {selectedPeritaje && (
-            <PeritajeFormCompleto
-              peritaje={selectedPeritaje}
-              onClose={handleCloseForm}
-              onSuccess={handlePeritajeUpdated}
-            />
-          )}
+      {/* Diálogo con la vista detallada */}
+      <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
+        <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
+          {selectedPeritaje && <PeritajeCompletoView peritaje={selectedPeritaje} />}
         </DialogContent>
       </Dialog>
     </div>

@@ -88,7 +88,7 @@ export default function PeritajeForm({ appointmentDetails }: PeritajeFormProps) 
         handlePago();
 
         
-        // processPaymentAndSave();
+        processPaymentAndSave();
     } catch (error) {
       console.error("Error al procesar el pago:", error)
       setPaymentStatus("rejected")
@@ -124,7 +124,7 @@ export default function PeritajeForm({ appointmentDetails }: PeritajeFormProps) 
         hora_turno: appointmentDetails.hora,
         estado: "pendiente",
         // Datos del pago (opcional)
-        payment_id: paymentId,
+        payment_id: paymentId ?? undefined,
         payment_status: "approved",
       }
 

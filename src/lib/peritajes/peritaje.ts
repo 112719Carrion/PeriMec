@@ -2,7 +2,7 @@ import { createServiceClient } from "@/src/lib/supabase"
 
 // Tipo para los datos del peritaje
 export interface PeritajeData {
-  id: string
+  id?: string
   marca: string
   modelo: string
   anio: string
@@ -17,8 +17,22 @@ export interface PeritajeData {
   fecha_turno: string
   hora_turno: string
   estado: string
+  payment_id?: string
+  payment_status?: string
   created_at?: string
   updated_at?: string
+  // Campos de evaluación del vehículo
+  estado_general?: string
+  carroceria?: string
+  pintura?: string
+  motor?: string
+  transmision?: string
+  frenos?: string
+  suspension?: string
+  sistema_electrico?: string
+  interior?: string
+  neumaticos?: string
+  conclusion?: string
 }
 
 // Función para crear un nuevo peritaje
@@ -196,6 +210,18 @@ export async function updatePeritaje(id: string, peritajeData: Partial<PeritajeD
         telefono_propietario: peritajeData.telefono_propietario,
         email_propietario: peritajeData.email_propietario,
         estado: peritajeData.estado,
+        // Campos de evaluación del vehículo
+        estado_general: peritajeData.estado_general,
+        carroceria: peritajeData.carroceria,
+        pintura: peritajeData.pintura,
+        motor: peritajeData.motor,
+        transmision: peritajeData.transmision,
+        frenos: peritajeData.frenos,
+        suspension: peritajeData.suspension,
+        sistema_electrico: peritajeData.sistema_electrico,
+        interior: peritajeData.interior,
+        neumaticos: peritajeData.neumaticos,
+        conclusion: peritajeData.conclusion,
       })
       .eq("id", id)
       .select()
