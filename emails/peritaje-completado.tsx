@@ -234,13 +234,6 @@ export default function PeritajeCompletadoEmail({ peritaje }: PeritajeCompletado
 
           <Hr style={hr} />
 
-          {/* Llamado a la acción */}
-          <Section style={ctaSection}>
-            <Link href={`${process.env.NEXT_PUBLIC_SITE_URL}/peritaje/detalle/${peritaje.id}`} style={button}>
-              Ver Peritaje Completo
-            </Link>
-          </Section>
-
           {/* Pie de página */}
           <Section style={footer}>
             <Text style={footerText}>© {new Date().getFullYear()} PeriMec. Todos los derechos reservados.</Text>
