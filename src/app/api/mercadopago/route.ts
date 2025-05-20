@@ -8,8 +8,6 @@ const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env
 export async function POST(request: Request) {
   // Obtenemos el cuerpo de la petición que incluye información sobre la notificación
   const body: {data: {id: string}} = await request.json();
-  console.log("Body prueba:", body);
-  console.log("--------------------------");
 
   // Obtenemos el pago
   const payment = await new Payment(mercadopago).get({id: body.data.id});
@@ -23,7 +21,6 @@ export async function POST(request: Request) {
       message: payment.description,
     };
 
-    console.log("PAGO:", payment);
     await supabase.from("payments").insert(donation);
 
     // Revalidamos la página de inicio para mostrar los datos actualizados

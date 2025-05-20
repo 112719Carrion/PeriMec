@@ -129,7 +129,7 @@ export default function PeritajeForm({ appointmentDetails }: PeritajeFormProps) 
       }
 
       // Enviar el email de confirmación
-      await fetch("/api/email", {
+      await fetch("/api/confirmado", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

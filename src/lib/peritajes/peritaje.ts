@@ -251,7 +251,7 @@ export async function updatePeritaje(id: string, peritajeData: Partial<PeritajeD
     if (updatedPeritaje && updatedPeritaje.estado === "completado" && estadoAnterior !== "completado") {
       try {
         // Enviar correo de notificación
-        await fetch("/api/email", {
+        await fetch("/api/completado", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
