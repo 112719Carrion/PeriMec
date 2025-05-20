@@ -8,11 +8,12 @@ import { Button } from "@/src/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/src/components/ui/table"
 import { Dialog, DialogContent } from "@/src/components/ui/dialog"
-import { Pencil, FileText, RefreshCw } from "lucide-react"
+import { Pencil, FileText, RefreshCw, Bell } from "lucide-react"
 import { fetchPeritajesPendientes } from "@/src/lib/peritajes/peritaje"
 import { useToast } from "@/src/hooks/use-toast"
 import PeritajeFormCompleto from "./peritaje-form-completo"
 import type { PeritajeData } from "@/src/lib/peritajes/peritaje"
+import { sendReminderEmail } from "@/src/app/api/recordatorio/route"
 
 export default function PeritajesPendientesView() {
   const router = useRouter()
@@ -49,6 +50,16 @@ export default function PeritajesPendientesView() {
   const handleEditPeritaje = (peritaje: PeritajeData) => {
     setSelectedPeritaje(peritaje)
     setIsFormOpen(true)
+  }
+
+  const handleRecordatorio = async (peritaje: PeritajeData) => {
+    setSelectedPeritaje(peritaje)
+    await sendReminderEmail({
+        clienteEmail: peritaje.email_propietario,
+        clienteNombre: peritaje.nombre_propietario,
+        fechaPeritaje: peritaje.fecha_turno,
+        // Incluye cualquier otro dato necesario para el email
+      })
   }
 
   // Cerrar el formulario de edición
@@ -109,6 +120,7 @@ export default function PeritajesPendientesView() {
                   <TableHead>Teléfono</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Estado</TableHead>
+                  <TableHead className="text-right">Recordatorio</TableHead>
                   <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
@@ -124,6 +136,17 @@ export default function PeritajesPendientesView() {
                       <span className="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">
                         Pendiente
                       </span>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Button
+                        onClick={() => handleRecordatorio(peritaje)}
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                      >
+                        <Bell className="h-4 w-4" />
+                        <span className="sr-only">Notificar</span>
+                      </Button>
                     </TableCell>
                     <TableCell className="text-right">
                       <Button
