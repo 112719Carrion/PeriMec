@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/src/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/src/components/ui/card"
-import { Calendar } from "@/src/components/ui/calendar"
+import { Calendar } from "@/components/ui/calendar"
 import {
   Dialog,
   DialogContent,
@@ -122,15 +122,14 @@ export default function NuevoPeritajeView() {
             <DialogDescription>Seleccione la fecha y hora para realizar el peritaje</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
+            <div className="grid gap-2 items-center justify-items-center">
               <label className="text-sm font-medium">Fecha</label>
               <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={handleDateSelect}
-                disabled={disabledDays}
-                locale={es}
-                className="rounded-md border"
+              mode="single"
+              selected={selectedDate}
+              onSelect={handleDateSelect}
+              disabled={disabledDays}
+              initialFocus
               />
             </div>
 

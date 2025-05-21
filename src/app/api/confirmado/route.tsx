@@ -19,4 +19,7 @@ export async function POST(request: Request, res: Response) {
     if (error) {
         return new Response(JSON.stringify({error}), {status: 500});
     }
+    
+    // Respondemos con un estado 200 para indicarle que la notificación fue recibida
+    return new Response(null, {status: 200});
 }
