@@ -24,7 +24,7 @@ export const PeritajeReminderEmail = ({
       <Preview>Recordatorio de su peritaje programado</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Img src={`${process.env.NEXT_PUBLIC_APP_URL}/logo.png`} width="150" height="auto" alt="Logo" style={logo} />
+          <Img src="src/public/logo.png" width="150" height="auto" alt="Logo" style={logo} />
           <Heading style={heading}>Recordatorio de Peritaje</Heading>
           <Section style={section}>
             <Text style={text}>Estimado/a {clienteNombre},</Text>

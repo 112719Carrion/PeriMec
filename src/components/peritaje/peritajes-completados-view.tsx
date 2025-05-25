@@ -8,7 +8,7 @@ import { Button } from "@/src/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/src/components/ui/table"
 import { Dialog, DialogContent } from "@/src/components/ui/dialog"
-import { Pencil, FileText, RefreshCw, Download } from "lucide-react"
+import { Pencil, FileText, RefreshCw, Download, Eye } from "lucide-react"
 import { fetchPeritajesCompletados } from "@/src/lib/peritajes/peritaje"
 import { generatePeritajePDF } from "@/src/lib/pdf/generate-pdf"
 import { useToast } from "@/src/hooks/use-toast"
@@ -171,7 +171,7 @@ export default function PeritajesCompletadosView() {
                         className="h-8 w-8 p-0 mr-2"
                         title="Ver detalles"
                       >
-                        <Pencil className="h-4 w-4" />
+                        <Eye className="h-4 w-4" />
                         <span className="sr-only">Ver detalles</span>
                       </Button>
                       <Button

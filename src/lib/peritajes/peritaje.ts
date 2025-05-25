@@ -335,4 +335,5 @@ export async function fetchPeritajesCompletados() {
     console.error("Error en fetchPeritajesCompletados:", error)
     throw error
   }
+
 }

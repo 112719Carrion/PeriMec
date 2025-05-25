@@ -1,5 +1,7 @@
+import { RoleContent } from "@/src/components/role-content";
 import { Button } from "@/src/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/src/components/ui/card"
+import { fetchKPIPeritajes } from "@/src/lib/peritajes/stats";
 import Link from "next/link"
 
 export default function PeritajePage() {
@@ -16,20 +18,22 @@ export default function PeritajePage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Peritajes Pendientes</CardTitle>
-            <CardDescription>Peritajes agendados pendientes de realización</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">0</div>
-          </CardContent>
-          <CardFooter>
-            <Button variant="outline" className="w-full" asChild>
-              <Link href="/peritaje/pendientes">Ver pendientes</Link>
-            </Button>
-          </CardFooter>
-        </Card>
+        <RoleContent allowedRoles={["admin", "perito"]}>  
+          <Card>
+            <CardHeader>
+              <CardTitle>Peritajes Pendientes</CardTitle>
+              <CardDescription>Peritajes agendados pendientes de realización</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{fetchKPIPeritajes("pendiente")}</div>
+            </CardContent>
+            <CardFooter>
+              <Button variant="outline" className="w-full" asChild>
+                <Link href="/peritaje/pendientes">Ver pendientes</Link>
+              </Button>
+            </CardFooter>
+          </Card>
+        </RoleContent>
 
         <Card>
           <CardHeader>
@@ -37,7 +41,7 @@ export default function PeritajePage() {
             <CardDescription>Peritajes realizados y finalizados</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">0</div>
+            <div className="text-3xl font-bold">{fetchKPIPeritajes("completado")}</div>
           </CardContent>
           <CardFooter>
             <Button variant="outline" className="w-full" asChild>
@@ -52,7 +56,7 @@ export default function PeritajePage() {
             <CardDescription>Informes de peritajes generados</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">0</div>
+            <div className="text-3xl font-bold">{fetchKPIPeritajes("")}</div>
           </CardContent>
           <CardFooter>
             <Button variant="outline" className="w-full" asChild>
@@ -62,7 +66,7 @@ export default function PeritajePage() {
         </Card>
       </div>
 
-      <div className="mt-6">
+      {/* <div className="mt-6">
         <Card>
           <CardHeader>
             <CardTitle>Peritajes Recientes</CardTitle>
@@ -72,7 +76,7 @@ export default function PeritajePage() {
             <div className="text-center py-8 text-muted-foreground">No hay peritajes recientes para mostrar</div>
           </CardContent>
         </Card>
-      </div>
+      </div> */}
     </div>
   )
 }
