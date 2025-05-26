@@ -11,6 +11,7 @@ export default function AdministracionLayout({
     { name: "Usuarios", href: "/administracion" },
     { name: "Configuración", href: "/administracion/configuracion" },
     { name: "Reportes", href: "/administracion/reportes" },
+    { name: "Pagos", href: "/administracion/pagos" },
   ]
 
   return <AppLayout sidebarItems={adminSidebarItems}>{children}</AppLayout>

@@ -18,7 +18,7 @@ export interface PeritajeData {
   hora_turno: string
   estado: string
   payment_id?: string
-  payment_status?: string
+  payment_status?: boolean
   created_at?: string
   updated_at?: string
   // Campos de evaluación del vehículo
@@ -69,6 +69,7 @@ export async function createPeritaje(peritajeData: Omit<PeritajeData, "id" | "cr
           fecha_turno: peritajeData.fecha_turno,
           hora_turno: peritajeData.hora_turno,
           estado: peritajeData.estado,
+          senaPendiente: peritajeData.payment_status,
           // El usuario que crea el peritaje (se puede obtener del contexto de autenticación)
           // user_id: auth.currentUser.id,
         },
@@ -120,9 +121,9 @@ export async function fetchPeritajes() {
 }
 
 // Función para obtener peritajes pendientes
-export async function fetchPeritajesPendientes() {
+export async function fetchPeritajesPendientes(señado:boolean = false) {
   try {
-    console.log("Iniciando fetchPeritajesPendientes...")
+    console.log("Iniciando fetchPeritajesPendiente222s...")
 
     // Crear el cliente de servicio
     const supabase = createServiceClient()
@@ -137,6 +138,7 @@ export async function fetchPeritajesPendientes() {
       .from("peritajes")
       .select("*")
       .eq("estado", "pendiente")
+      .eq("senaPendiente", señado)
       .order("fecha_turno", { ascending: true })
 
     if (error) {
@@ -221,6 +223,7 @@ export async function updatePeritaje(id: string, peritajeData: Partial<PeritajeD
         telefono_propietario: peritajeData.telefono_propietario,
         email_propietario: peritajeData.email_propietario,
         estado: peritajeData.estado,
+        senaPendiente: peritajeData.payment_status,
         // Campos de evaluación del vehículo
         estado_general: peritajeData.estado_general,
         carroceria: peritajeData.carroceria,

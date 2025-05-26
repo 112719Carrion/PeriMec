@@ -1,4 +1,5 @@
 import { supabase } from "@/src/lib/supabase"
+import { redirect } from "next/navigation"
 
 // Función para iniciar sesión
 export async function signIn(email: string, password: string) {
