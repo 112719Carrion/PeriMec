@@ -11,6 +11,7 @@ import { updatePeritaje } from "@/src/lib/peritajes/peritaje"
 import { useToast } from "@/src/hooks/use-toast"
 import type { PeritajeData } from "@/src/lib/peritajes/peritaje"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { createClient } from "@supabase/supabase-js"
 
 const formSchema = z.object({
   senaPendiente: z.boolean(),
@@ -23,6 +24,9 @@ interface PeritajeFormCompletoProps {
   onClose: () => void
   onSuccess: () => void
 }
+
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY!);
+
 
 export default function PeritajeFormCompleto({ peritaje, onClose, onSuccess }: PeritajeFormCompletoProps) {
   const { toast } = useToast()
@@ -41,6 +45,15 @@ export default function PeritajeFormCompleto({ peritaje, onClose, onSuccess }: P
       await updatePeritaje(peritaje.id!, {
         payment_status: !data.senaPendiente ? true : false
       })
+
+      const donation = {
+            amount: 1000,
+            message: "Efectivo",
+            type: 2, // 2 para Efectivo
+          };
+
+      await supabase.from("payments").insert(donation);
+      
       toast({
         title: "Peritaje actualizado",
         description: "El peritaje ha sido actualizado correctamente.",

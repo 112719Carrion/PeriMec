@@ -14,6 +14,7 @@ import { createPeritaje } from "@/src/lib/peritajes/peritaje"
 import { useToast } from "@/src/hooks/use-toast"
 import { Alert, AlertDescription, AlertTitle } from "@/src/components/ui/alert"
 import { redirectMP } from "@/src/app/actions/peritaje"
+import { createClient, SupabaseClient } from "@supabase/supabase-js"
 
 // Esquema de validación para el formulario
 // Solo los campos del propietario son obligatorios

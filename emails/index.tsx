@@ -32,7 +32,7 @@ export const PerimiecConfirmacion = ({
       <Container style={container}>
         <Text style={paragraph}>Hola {userFirstname},</Text>
         <Text style={paragraph}>
-          Su turno en PeriMec para el {fecha} y {hora}fue confirmado con exito, ante cualquier enventualidad por favor notifique al equipo.
+          Su turno en PeriMec para el {fecha} y {hora} fue confirmado con exito, ante cualquier enventualidad por favor notifique al equipo.
         </Text>
         <Text style={paragraph}>
           Saludos,

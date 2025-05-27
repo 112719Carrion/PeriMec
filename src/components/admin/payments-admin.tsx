@@ -83,7 +83,7 @@ export default function PaymentsAdmin() {
       <Card className="w-full">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-2xl">Peritajes Pendientes</CardTitle>
+            <CardTitle className="text-2xl">Peritajes con pago pendiente</CardTitle>
             <CardDescription>Lista de peritajes pendientes de completar el pago de la seña</CardDescription>
           </div>
           <Button onClick={loadPeritajes} variant="outline" size="sm" disabled={loading}>
