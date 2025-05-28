@@ -19,6 +19,7 @@ export async function POST(request: Request) {
       id: payment.id,
       amount: payment.transaction_amount,
       message: payment.description,
+      type: 1, // 1 para MP
     };
 
     await supabase.from("payments").insert(donation);

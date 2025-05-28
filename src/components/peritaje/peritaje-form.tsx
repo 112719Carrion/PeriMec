@@ -1,7 +1,7 @@
-import { useState, useTransition } from "react"
+import { useRef, useState, useTransition } from "react"
 import { redirect, useRouter } from "next/navigation"
 import { format, parse, parseISO } from "date-fns"
-import { es } from "date-fns/locale"
+import { es, id } from "date-fns/locale"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -13,8 +13,8 @@ import { Calendar, Clock, AlertCircle, CheckCircle, Loader2 } from "lucide-react
 import { createPeritaje } from "@/src/lib/peritajes/peritaje"
 import { useToast } from "@/src/hooks/use-toast"
 import { Alert, AlertDescription, AlertTitle } from "@/src/components/ui/alert"
-import api from "@/src/api"
 import { redirectMP } from "@/src/app/actions/peritaje"
+import { createClient, SupabaseClient } from "@supabase/supabase-js"
 
 // Esquema de validación para el formulario
 // Solo los campos del propietario son obligatorios
@@ -41,6 +41,7 @@ export default function PeritajeForm({ appointmentDetails }: PeritajeFormProps) 
   const router = useRouter()
   const { toast } = useToast()
   const [isPending, start] = useTransition();
+  const pagoEnEfectivo = useRef(false); // Cambia esto según la lógica de tu aplicación
 
   // **Aquí**: estado local
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>("pending")
@@ -85,10 +86,14 @@ export default function PeritajeForm({ appointmentDetails }: PeritajeFormProps) 
     setIsSubmitting(true)
 
     try {
-        handlePago();
+        if (!pagoEnEfectivo.current) {
+          handlePago();
+        }       
 
-        
-        processPaymentAndSave();
+        await processPaymentAndSave();
+        if (pagoEnEfectivo.current) {
+          router.push("/")
+        }
     } catch (error) {
       console.error("Error al procesar el pago:", error)
       setPaymentStatus("rejected")
@@ -107,6 +112,7 @@ export default function PeritajeForm({ appointmentDetails }: PeritajeFormProps) 
 
     try {
       // Crear el objeto de peritaje con los datos del formulario y la cita
+
       const peritajeData = {
         // Datos del propietario del formulario
         ...formData,
@@ -124,8 +130,8 @@ export default function PeritajeForm({ appointmentDetails }: PeritajeFormProps) 
         hora_turno: appointmentDetails.hora,
         estado: "pendiente",
         // Datos del pago (opcional)
-        payment_id: paymentId ?? undefined,
-        payment_status: "approved",
+        payment_id: paymentId ?? undefined,        
+        payment_status: pagoEnEfectivo.current,//false es MP, true es efectivo
       }
 
       // Enviar el email de confirmación
@@ -246,10 +252,29 @@ export default function PeritajeForm({ appointmentDetails }: PeritajeFormProps) 
               )}
 
               {paymentStatus === "pending" && (
-                <Button onClick={PaymentCreate} disabled={isSubmitting}>
-                  Proceder al pago
+                <Button
+                  type="button"
+                  onClick={() => {
+                    pagoEnEfectivo.current = true;
+                    PaymentCreate(); // Marcamos que se pagará en efectivo
+                  }}
+                >
+                  Abonar en efectivo
                 </Button>
               )}
+
+              {paymentStatus === "pending" && (
+                <Button
+                  type="button"
+                  onClick={() => {
+                    pagoEnEfectivo.current = false;
+                    PaymentCreate(); // Se pagará con MP
+                  }}
+                >
+                  Abonar con Mercado Pago
+                </Button>
+              )}
+
 
               {paymentStatus === "processing" && (
                 <Button disabled={true}>
@@ -323,7 +348,7 @@ export default function PeritajeForm({ appointmentDetails }: PeritajeFormProps) 
                 <Button variant="outline" onClick={() => router.back()}>
                   Volver
                 </Button>
-                <Button type="submit">Continuar al pago</Button>
+                <Button type="submit">Continuar con el pago</Button>
               </div>
             </form>
           </Form>
