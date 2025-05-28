@@ -1,8 +1,8 @@
 import PaymentsAdmin from "@/src/components/admin/payments-admin";
 
-export default function UsersAdminPage() {
+export default function PaymentsAdminPage() {
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col h-full p-4 space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Gestión de Pagos</h1>
       </div>
@@ -11,7 +11,9 @@ export default function UsersAdminPage() {
           Administra los peritajes que tiene pendiente asignar un pago.
         </p>
       </div>
-      <PaymentsAdmin />
+      <div className="flex-1 overflow-auto">
+        <PaymentsAdmin />
+      </div>
     </div>
   )
 }
