@@ -1,4 +1,5 @@
 import { createServiceClient } from "@/src/lib/supabase"
+import { supabase } from "@/src/lib/supabase" // Agregar importación del cliente de autenticación
 
 // Tipo para los datos del peritaje
 export interface PeritajeData {
@@ -21,6 +22,7 @@ export interface PeritajeData {
   payment_status?: boolean
   created_at?: string
   updated_at?: string
+  user_id?: string // ID del usuario que crea/modifica el peritaje
   // Campos de evaluación del vehículo
   estado_general?: string
   carroceria?: string
@@ -41,17 +43,25 @@ export async function createPeritaje(peritajeData: Omit<PeritajeData, "id" | "cr
     console.log("Iniciando creación de peritaje...")
 
     // Crear el cliente de servicio
-    const supabase = createServiceClient()
+    const supabaseService = createServiceClient()
 
-    if (!supabase) {
+    if (!supabaseService) {
       console.error("Error: No se pudo crear el cliente de servicio de Supabase")
       throw new Error("Error de configuración de Supabase")
     }
 
     console.log("Cliente de servicio creado correctamente")
 
+    // Obtener el usuario actual usando el cliente de autenticación
+    const { data: { session } } = await supabase.auth.getSession()
+    const userId = session?.user?.id
+
+    if (!userId) {
+      throw new Error("No hay usuario autenticado")
+    }
+
     // Insertar el peritaje en la tabla de peritajes
-    const { data, error } = await supabase
+    const { data, error } = await supabaseService
       .from("peritajes")
       .insert([
         {
@@ -70,8 +80,7 @@ export async function createPeritaje(peritajeData: Omit<PeritajeData, "id" | "cr
           hora_turno: peritajeData.hora_turno,
           estado: peritajeData.estado,
           senaPendiente: peritajeData.payment_status,
-          // El usuario que crea el peritaje (se puede obtener del contexto de autenticación)
-          // user_id: auth.currentUser.id,
+          user_id: userId, // Agregar el ID del usuario
         },
       ])
       .select()
@@ -189,15 +198,24 @@ export async function updatePeritaje(id: string, peritajeData: Partial<PeritajeD
     console.log(`Iniciando updatePeritaje para ID: ${id}...`)
 
     // Crear el cliente de servicio
-    const supabase = createServiceClient()
+    const supabaseService = createServiceClient()
 
-    if (!supabase) {
+    if (!supabaseService) {
       console.error("Error: No se pudo crear el cliente de servicio de Supabase")
       throw new Error("Error de configuración de Supabase")
     }
 
+    // Obtener el usuario actual usando el cliente de autenticación
+    const { data: { session } } = await supabase.auth.getSession()
+    const userId = session?.user?.id
+    console.log("userId", userId)
+
+    if (!userId) {
+      throw new Error("No hay usuario autenticado")
+    }
+
     // Obtener el peritaje anterior para verificar si el estado ha cambiado
-    const { data: prevPeritaje, error: fetchError } = await supabase
+    const { data: prevPeritaje, error: fetchError } = await supabaseService
       .from("peritajes")
       .select("estado")
       .eq("id", id)
@@ -207,8 +225,8 @@ export async function updatePeritaje(id: string, peritajeData: Partial<PeritajeD
       console.error(`Error al obtener estado anterior del peritaje con ID ${id}:`, fetchError)
     }
 
-    // Actualizar el peritaje
-    const { data, error } = await supabase
+    // Actualizar el peritaje usando el cliente de servicio
+    const { data, error } = await supabaseService
       .from("peritajes")
       .update({
         marca: peritajeData.marca,
@@ -224,6 +242,7 @@ export async function updatePeritaje(id: string, peritajeData: Partial<PeritajeD
         email_propietario: peritajeData.email_propietario,
         estado: peritajeData.estado,
         senaPendiente: peritajeData.payment_status,
+        user_id: userId, // Agregar el ID del usuario
         // Campos de evaluación del vehículo
         estado_general: peritajeData.estado_general,
         carroceria: peritajeData.carroceria,
