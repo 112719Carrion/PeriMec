@@ -17,42 +17,52 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Clock, CalendarIcon, CheckCircle } from "lucide-react"
+import { getAvailableTimes } from "@/src/lib/peritajes/peritaje"
+import { useToast } from "@/src/hooks/use-toast"
 
 export default function NuevoPeritajeView() {
   const router = useRouter()
+  const { toast } = useToast()
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
   const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined)
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false)
-
-  // Horarios disponibles (se podrían cargar desde la base de datos)
-  const availableTimes = [
-    "09:00",
-    "09:30",
-    "10:00",
-    "10:30",
-    "11:00",
-    "11:30",
-    "12:00",
-    "12:30",
-    "13:00",
-    "13:30",
-    "14:00",
-    "14:30",
-    "15:00",
-    "15:30",
-    "16:00",
-    "16:30",
-    "17:00",
-    "17:30",
-  ]
+  const [availableTimes, setAvailableTimes] = useState<string[]>([])
+  const [loading, setLoading] = useState(false)
 
   const handleAgendarTurno = () => {
     setIsCalendarOpen(true)
   }
 
-  const handleDateSelect = (date: Date | undefined) => {
+  const handleDateSelect = async (date: Date | undefined) => {
     setSelectedDate(date)
+    setSelectedTime(undefined) // Reset selected time when date changes
+    
+    if (date) {
+      setLoading(true)
+      try {
+        const formattedDate = format(date, "yyyy-MM-dd")
+        const times = await getAvailableTimes(formattedDate)
+        setAvailableTimes(times)
+        
+        if (times.length === 0) {
+          toast({
+            title: "Sin horarios disponibles",
+            description: "No hay horarios disponibles para la fecha seleccionada. Por favor, seleccione otra fecha.",
+            variant: "destructive",
+          })
+        }
+      } catch (error) {
+        console.error("Error al obtener horarios disponibles:", error)
+        toast({
+          title: "Error",
+          description: "No se pudieron cargar los horarios disponibles. Intente nuevamente.",
+          variant: "destructive",
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
   }
 
   const handleTimeSelect = (time: string) => {
@@ -94,17 +104,17 @@ export default function NuevoPeritajeView() {
           <CardDescription>Agenda un turno para realizar el peritaje de un vehículo</CardDescription>
         </CardHeader>
         <CardContent>
-            <div className="space-y-6">
+          <div className="space-y-6">
             <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 text-black">
               <h3 className="text-lg font-medium mb-4">Información importante</h3>
               <ul className="list-disc pl-5 space-y-2">
-              <li>El peritaje tiene una duración aproximada de 1 hora</li>
-              <li>Debe presentarse con el vehículo limpio para una mejor evaluación</li>
-              <li>Traiga toda la documentación del vehículo</li>
-              <li>En caso de no poder asistir, cancele el turno con 24 horas de anticipación</li>
+                <li>El peritaje tiene una duración aproximada de 1 hora</li>
+                <li>Debe presentarse con el vehículo limpio para una mejor evaluación</li>
+                <li>Traiga toda la documentación del vehículo</li>
+                <li>En caso de no poder asistir, cancele el turno con 24 horas de anticipación</li>
               </ul>
             </div>
-            </div>
+          </div>
         </CardContent>
         <CardFooter className="flex justify-end">
           <Button onClick={handleAgendarTurno}>
@@ -125,20 +135,20 @@ export default function NuevoPeritajeView() {
             <div className="grid gap-2 items-center justify-items-center">
               <label className="text-sm font-medium">Fecha</label>
               <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={handleDateSelect}
-              disabled={disabledDays}
-              initialFocus
+                mode="single"
+                selected={selectedDate}
+                onSelect={handleDateSelect}
+                disabled={disabledDays}
+                initialFocus
               />
             </div>
 
             {selectedDate && (
               <div className="grid gap-2">
                 <label className="text-sm font-medium">Hora</label>
-                <Select onValueChange={handleTimeSelect} value={selectedTime}>
+                <Select onValueChange={handleTimeSelect} value={selectedTime} disabled={loading}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Seleccione un horario" />
+                    <SelectValue placeholder={loading ? "Cargando horarios..." : "Seleccione un horario"} />
                   </SelectTrigger>
                   <SelectContent>
                     {availableTimes.map((time) => (
@@ -155,7 +165,10 @@ export default function NuevoPeritajeView() {
             <Button variant="outline" onClick={() => setIsCalendarOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleConfirmAppointment} disabled={!selectedDate || !selectedTime}>
+            <Button 
+              onClick={handleConfirmAppointment} 
+              disabled={!selectedDate || !selectedTime || loading}
+            >
               Confirmar
             </Button>
           </DialogFooter>

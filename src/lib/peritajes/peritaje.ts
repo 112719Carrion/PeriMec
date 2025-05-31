@@ -59,6 +59,7 @@ export async function createPeritaje(peritajeData: Omit<PeritajeData, "id" | "cr
     if (!userId) {
       throw new Error("No hay usuario autenticado")
     }
+    console.log("userId", userId)
 
     // Insertar el peritaje en la tabla de peritajes
     const { data, error } = await supabaseService
@@ -358,4 +359,83 @@ export async function fetchPeritajesCompletados() {
     throw error
   }
 
+}
+
+// Función para verificar si un horario está disponible
+export async function checkAppointmentAvailability(fecha: string, hora: string): Promise<boolean> {
+  try {
+    console.log(`Verificando disponibilidad para ${fecha} ${hora}...`)
+
+    // Crear el cliente de servicio
+    const supabase = createServiceClient()
+
+    if (!supabase) {
+      console.error("Error: No se pudo crear el cliente de servicio de Supabase")
+      throw new Error("Error de configuración de Supabase")
+    }
+
+    // Consultar la tabla de peritajes para verificar si ya existe una cita en ese horario
+    const { data, error } = await supabase
+      .from("peritajes")
+      .select("id")
+      .eq("fecha_turno", fecha)
+      .eq("hora_turno", hora)
+      .eq("estado", "pendiente")
+
+    if (error) {
+      console.error("Error al verificar disponibilidad:", error)
+      throw new Error(`Error al verificar disponibilidad: ${error.message}`)
+    }
+
+    // Si hay datos, significa que el horario está ocupado
+    return data.length === 0
+  } catch (error: any) {
+    console.error("Error en checkAppointmentAvailability:", error)
+    throw error
+  }
+}
+
+// Función para obtener los horarios disponibles para una fecha específica
+export async function getAvailableTimes(fecha: string): Promise<string[]> {
+  try {
+    console.log(`Obteniendo horarios disponibles para ${fecha}...`)
+
+    // Crear el cliente de servicio
+    const supabase = createServiceClient()
+
+    if (!supabase) {
+      console.error("Error: No se pudo crear el cliente de servicio de Supabase")
+      throw new Error("Error de configuración de Supabase")
+    }
+
+    // Consultar la tabla de peritajes para obtener los horarios ocupados
+    const { data, error } = await supabase
+      .from("peritajes")
+      .select("hora_turno")
+      .eq("fecha_turno", fecha)
+      .eq("estado", "pendiente")
+
+    if (error) {
+      console.error("Error al obtener horarios ocupados:", error)
+      throw new Error(`Error al obtener horarios ocupados: ${error.message}`)
+    }
+
+    // Lista de todos los horarios posibles
+    const allTimes = [
+      "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
+      "12:00", "12:30", "13:00", "13:30", "14:00", "14:30",
+      "15:00", "15:30", "16:00", "16:30", "17:00", "17:30"
+    ]
+
+    // Obtener los horarios ocupados
+    const occupiedTimes = data.map(peritaje => peritaje.hora_turno)
+
+    // Filtrar los horarios disponibles
+    const availableTimes = allTimes.filter(time => !occupiedTimes.includes(time))
+
+    return availableTimes
+  } catch (error: any) {
+    console.error("Error en getAvailableTimes:", error)
+    throw error
+  }
 }
