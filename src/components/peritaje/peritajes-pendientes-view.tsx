@@ -1,27 +1,32 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { format, parseISO } from "date-fns"
 import { es } from "date-fns/locale"
 import { Button } from "@/src/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/src/components/ui/table"
 import { Dialog, DialogContent } from "@/src/components/ui/dialog"
-import { Pencil, FileText, RefreshCw, Bell } from "lucide-react"
+import { Input } from "@/src/components/ui/input"
+import { Calendar } from "@/src/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/src/components/ui/popover"
+import { Pencil, FileText, RefreshCw, Bell, CalendarIcon, Search, X } from "lucide-react"
 import { fetchPeritajesPendientes } from "@/src/lib/peritajes/peritaje"
 import { useToast } from "@/src/hooks/use-toast"
 import PeritajeFormCompleto from "./peritaje-form-completo"
 import type { PeritajeData } from "@/src/lib/peritajes/peritaje"
 import { sendReminderEmail } from "@/src/app/api/recordatorio/route"
+import { cn } from "@/src/lib/utils"
 
 export default function PeritajesPendientesView() {
-  const router = useRouter()
   const { toast } = useToast()
   const [peritajes, setPeritajes] = useState<PeritajeData[]>([])
+  const [filteredPeritajes, setFilteredPeritajes] = useState<PeritajeData[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedPeritaje, setSelectedPeritaje] = useState<PeritajeData | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
 
   // Cargar los peritajes pendientes
   const loadPeritajes = async () => {
@@ -29,6 +34,7 @@ export default function PeritajesPendientesView() {
     try {
       const data = await fetchPeritajesPendientes()
       setPeritajes(data)
+      setFilteredPeritajes(data)
     } catch (error) {
       console.error("Error al cargar peritajes pendientes:", error)
       toast({
@@ -46,6 +52,36 @@ export default function PeritajesPendientesView() {
     loadPeritajes()
   }, [])
 
+  // Filtrar peritajes cuando cambia el término de búsqueda o la fecha
+  useEffect(() => {
+    let filtered = [...peritajes]
+
+    // Filtrar por término de búsqueda (nombre, email o teléfono)
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase()
+      filtered = filtered.filter(
+        (peritaje) =>
+          peritaje.nombre_propietario.toLowerCase().includes(searchLower) ||
+          peritaje.email_propietario.toLowerCase().includes(searchLower) ||
+          peritaje.telefono_propietario.includes(searchTerm)
+      )
+    }
+
+    // Filtrar por fecha
+    if (selectedDate) {
+      const selectedDateStr = format(selectedDate, "yyyy-MM-dd")
+      filtered = filtered.filter((peritaje) => peritaje.fecha_turno === selectedDateStr)
+    }
+
+    setFilteredPeritajes(filtered)
+  }, [searchTerm, selectedDate, peritajes])
+
+  // Limpiar filtros
+  const clearFilters = () => {
+    setSearchTerm("")
+    setSelectedDate(undefined)
+  }
+
   // Abrir el formulario de edición
   const handleEditPeritaje = (peritaje: PeritajeData) => {
     setSelectedPeritaje(peritaje)
@@ -55,11 +91,10 @@ export default function PeritajesPendientesView() {
   const handleRecordatorio = async (peritaje: PeritajeData) => {
     setSelectedPeritaje(peritaje)
     await sendReminderEmail({
-        clienteEmail: peritaje.email_propietario,
-        clienteNombre: peritaje.nombre_propietario,
-        fechaPeritaje: peritaje.fecha_turno,
-        // Incluye cualquier otro dato necesario para el email
-      })
+      clienteEmail: peritaje.email_propietario,
+      clienteNombre: peritaje.nombre_propietario,
+      fechaPeritaje: peritaje.fecha_turno,
+    })
   }
 
   // Cerrar el formulario de edición
@@ -83,7 +118,7 @@ export default function PeritajesPendientesView() {
   const formatDate = (dateString: string) => {
     try {
       return format(parseISO(dateString), "dd/MM/yyyy", { locale: es })
-    } catch (error) {
+    } catch {
       return dateString
     }
   }
@@ -102,12 +137,59 @@ export default function PeritajesPendientesView() {
           </Button>
         </CardHeader>
         <CardContent>
-          {peritajes.length === 0 ? (
+          {/* Filtros */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="relative flex-1">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por nombre, email o teléfono..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-8"
+              />
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-[240px] justify-start text-left font-normal",
+                    !selectedDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {selectedDate ? format(selectedDate, "PPP", { locale: es }) : "Seleccionar fecha"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+            {(searchTerm || selectedDate) && (
+              <Button variant="ghost" size="sm" onClick={clearFilters}>
+                <X className="h-4 w-4 mr-2" />
+                Limpiar filtros
+              </Button>
+            )}
+          </div>
+
+          {filteredPeritajes.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8">
               <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-lg font-medium">No hay peritajes pendientes</p>
+              <p className="text-lg font-medium">
+                {peritajes.length === 0
+                  ? "No hay peritajes pendientes"
+                  : "No se encontraron resultados"}
+              </p>
               <p className="text-sm text-muted-foreground">
-                Cuando se agende un nuevo peritaje, aparecerá en esta lista
+                {peritajes.length === 0
+                  ? "Cuando se agende un nuevo peritaje, aparecerá en esta lista"
+                  : "Intenta con otros criterios de búsqueda"}
               </p>
             </div>
           ) : (
@@ -125,7 +207,7 @@ export default function PeritajesPendientesView() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {peritajes.map((peritaje) => (
+                {filteredPeritajes.map((peritaje) => (
                   <TableRow key={peritaje.id}>
                     <TableCell>{formatDate(peritaje.fecha_turno)}</TableCell>
                     <TableCell>{peritaje.hora_turno}</TableCell>

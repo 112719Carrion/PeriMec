@@ -37,13 +37,13 @@ export const PeritajeReminderEmail = ({
       <Body style={main}>
         <Container style={container}>
           {/* Encabezado */}
-          <Section style={header}>
-            <Img src="/logo.png" width="150" height="auto" alt="PeriMec Logo" style={logo} />
+            <Section style={header}>
+            <Img src="https://localhost:3000/public/logo.png" width="150" height="auto" alt="PeriMec Logo" style={logo} />
             <Heading style={heading}>Recordatorio de Peritaje</Heading>
             <Text style={subheading}>
               Le recordamos que tiene un peritaje programado próximamente.
             </Text>
-          </Section>
+            </Section>
 
           <Hr style={hr} />
 

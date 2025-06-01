@@ -85,11 +85,12 @@ export default function PeritajeForm({ appointmentDetails }: PeritajeFormProps) 
     setIsSubmitting(true)
 
     try {
-        if (!pagoEnEfectivo.current) {
+      await processPaymentAndSave();
+      
+      if (!pagoEnEfectivo.current) {
           handlePago();
         }       
 
-        await processPaymentAndSave();
         if (pagoEnEfectivo.current) {
           router.push("/")
         }

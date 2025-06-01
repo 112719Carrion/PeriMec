@@ -11,10 +11,10 @@ import { useAuth } from "@/src/context/auth-context"
 export default function Navbar() {
   const pathname = usePathname()
   const router = useRouter()
-  const { user, isAuthenticated, logout } = useAuth()
+  const { user, isAuthenticated, logout, isLoading } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
-  const { isAdmin, isPerito, isUser } = useAuth()
+  const { isAdmin } = useAuth()
 
   // Asegurarse de que la ruta de "Administración" sea correcta
   const navItems = [
@@ -51,49 +51,51 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-6">
+          <nav className="hidden md:flex items-center space-x-6">
             {navItems
               .filter((item) => item.name !== "Administración" || isAdmin)
               .map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                "text-sm font-medium transition-colors hover:text-primary",
-                pathname === item.href ? "text-primary font-semibold" : "text-muted-foreground",
-                )}
-              >
-                {item.name}
-              </Link>
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "text-sm font-medium transition-colors hover:text-primary",
+                    pathname === item.href ? "text-primary font-semibold" : "text-muted-foreground",
+                  )}
+                >
+                  {item.name}
+                </Link>
               ))}
-            </nav>
+          </nav>
         </div>
 
         {/* Login/Logout Button (Desktop) */}
         <div className="hidden md:flex items-center gap-4">
-          {isAuthenticated ? (
-            <>
-              {user && (
-                <span className="text-sm text-muted-foreground">
-                  Hola, {user.user_metadata?.full_name || user.email}
-                </span>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLogout}
-                className="flex items-center"
-                disabled={isLoggingOut}
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                {isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
+          {!isLoading && (
+            isAuthenticated ? (
+              <>
+                {user && (
+                  <span className="text-sm text-muted-foreground">
+                    Hola, {user.user_metadata?.full_name || user.email}
+                  </span>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="flex items-center"
+                  disabled={isLoggingOut}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  {isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
+                </Button>
+              </>
+            ) : (
+              <Button variant="ghost" size="sm" onClick={handleLogin} className="flex items-center">
+                <LogIn className="h-4 w-4 mr-2" />
+                Iniciar sesión
               </Button>
-            </>
-          ) : (
-            <Button variant="ghost" size="sm" onClick={handleLogin} className="flex items-center">
-              <LogIn className="h-4 w-4 mr-2" />
-              Iniciar sesión
-            </Button>
+            )
           )}
         </div>
 
@@ -122,16 +124,18 @@ export default function Navbar() {
                   {item.name}
                 </Link>
               ))}
-              {isAuthenticated ? (
-                <Button variant="ghost" className="justify-start px-0" onClick={handleLogout} disabled={isLoggingOut}>
-                  <LogOut className="h-4 w-4 mr-2" />
-                  {isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
-                </Button>
-              ) : (
-                <Button variant="ghost" className="justify-start px-0" onClick={handleLogin}>
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Iniciar sesión
-                </Button>
+              {!isLoading && (
+                isAuthenticated ? (
+                  <Button variant="ghost" className="justify-start px-0" onClick={handleLogout} disabled={isLoggingOut}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    {isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
+                  </Button>
+                ) : (
+                  <Button variant="ghost" className="justify-start px-0" onClick={handleLogin}>
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Iniciar sesión
+                  </Button>
+                )
               )}
             </nav>
           </div>

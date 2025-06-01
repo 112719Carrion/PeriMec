@@ -30,7 +30,7 @@ export const PerimiecConfirmacion = ({
       <Container style={container}>
         {/* Encabezado */}
         <Section style={header}>
-          <Img src="/logo.png" width="150" height="auto" alt="PeriMec Logo" style={logo} />
+          <Img src="logo.png" width="150" height="auto" alt="PeriMec Logo" style={logo} />
           <Heading style={heading}>Turno Confirmado</Heading>
           <Text style={subheading}>
             Su turno ha sido confirmado exitosamente. A continuación encontrará los detalles.
