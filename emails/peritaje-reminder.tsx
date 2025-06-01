@@ -1,4 +1,16 @@
-import { Body, Container, Head, Heading, Html, Img, Link, Preview, Section, Text } from "@react-email/components"
+import {
+  Body,
+  Container,
+  Head,
+  Heading,
+  Hr,
+  Html,
+  Img,
+  Link,
+  Preview,
+  Section,
+  Text,
+} from "@react-email/components"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 
@@ -6,13 +18,13 @@ import { es } from "date-fns/locale"
 type PeritajeReminderEmailProps = {
   clienteNombre: string;
   fechaPeritaje: string | Date;
-  // Otros datos necesarios
+  direccion: string;
 };
 
 export const PeritajeReminderEmail = ({
   clienteNombre,
   fechaPeritaje,
-  // Otros datos necesarios
+  direccion = "Puerto Rico 1631",
 }: PeritajeReminderEmailProps) => {
   const formattedDate = fechaPeritaje
     ? format(new Date(fechaPeritaje), "EEEE d 'de' MMMM 'de' yyyy 'a las' HH:mm", { locale: es })
@@ -24,21 +36,43 @@ export const PeritajeReminderEmail = ({
       <Preview>Recordatorio de su peritaje programado</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Img src="src/public/logo.png" width="150" height="auto" alt="Logo" style={logo} />
-          <Heading style={heading}>Recordatorio de Peritaje</Heading>
-          <Section style={section}>
-            <Text style={text}>Estimado/a {clienteNombre},</Text>
-            <Text style={text}>
-              Le recordamos que tiene un peritaje programado para el {formattedDate} en Puerto Rico 1631.
+          {/* Encabezado */}
+            <Section style={header}>
+            <Img src="https://localhost:3000/public/logo.png" width="150" height="auto" alt="PeriMec Logo" style={logo} />
+            <Heading style={heading}>Recordatorio de Peritaje</Heading>
+            <Text style={subheading}>
+              Le recordamos que tiene un peritaje programado próximamente.
             </Text>
-            <Text style={text}>
+            </Section>
+
+          <Hr style={hr} />
+
+          {/* Detalles del peritaje */}
+          <Section style={section}>
+            <Text style={paragraph}>Estimado/a {clienteNombre},</Text>
+            <Text style={paragraph}>
+              Le recordamos que tiene un peritaje programado para el {formattedDate} en {direccion}.
+            </Text>
+            <Text style={paragraph}>
               Por favor, asegúrese de tener el vehículo disponible y los documentos necesarios para realizar el
               peritaje.
             </Text>
-            <Text style={text}>Si necesita reprogramar o tiene alguna pregunta, contáctenos lo antes posible.</Text>
+            <Text style={paragraph}>
+              Si necesita reprogramar o tiene alguna pregunta, contáctenos lo antes posible.
+            </Text>
           </Section>
+
+          <Hr style={hr} />
+
+          {/* Pie de página */}
           <Section style={footer}>
             <Text style={footerText}>© {new Date().getFullYear()} PeriMec. Todos los derechos reservados.</Text>
+            <Text style={footerText}>
+              Si tiene alguna pregunta, puede contactarnos a{" "}
+              <Link href="mailto:contacto@perimec.com" style={link}>
+                contacto@perimec.com
+              </Link>
+            </Text>
           </Section>
         </Container>
       </Body>
@@ -46,7 +80,7 @@ export const PeritajeReminderEmail = ({
   )
 }
 
-// Estilos (copiados de la plantilla original con pequeñas modificaciones)
+// Estilos
 const main = {
   backgroundColor: "#f6f9fc",
   fontFamily:
@@ -54,46 +88,64 @@ const main = {
 }
 
 const container = {
-  backgroundColor: "#ffffff",
   margin: "0 auto",
-  padding: "20px",
+  padding: "20px 0",
   maxWidth: "600px",
 }
 
+const header = {
+  backgroundColor: "#ffffff",
+  padding: "30px",
+  borderRadius: "5px 5px 0 0",
+  textAlign: "center" as const,
+}
+
 const logo = {
-  margin: "0 auto",
-  marginBottom: "20px",
+  margin: "0 auto 20px",
 }
 
 const heading = {
   fontSize: "24px",
-  letterSpacing: "-0.5px",
-  lineHeight: "1.3",
-  fontWeight: "400",
-  color: "#484848",
-  textAlign: "center" as const,
+  fontWeight: "bold",
+  margin: "0 0 10px",
+  color: "#333",
+}
+
+const subheading = {
+  fontSize: "16px",
+  lineHeight: "24px",
+  margin: "0",
+  color: "#666",
 }
 
 const section = {
-  padding: "20px",
+  backgroundColor: "#ffffff",
+  padding: "20px 30px",
 }
 
-const text = {
+const paragraph = {
   fontSize: "16px",
-  lineHeight: "1.4",
-  color: "#3c4043",
+  lineHeight: "24px",
+  color: "#333",
+  margin: "0 0 15px",
+}
+
+const hr = {
+  borderColor: "#e6ebf1",
+  margin: "0",
 }
 
 const footer = {
-  padding: "20px 0",
-  borderTop: "1px solid #e5e5e5",
+  backgroundColor: "#ffffff",
+  padding: "20px 30px",
+  borderRadius: "0 0 5px 5px",
+  textAlign: "center" as const,
 }
 
 const footerText = {
-  fontSize: "12px",
-  color: "#6a6a6a",
-  lineHeight: "1.5",
-  textAlign: "center" as const,
+  fontSize: "14px",
+  color: "#666",
+  margin: "5px 0",
 }
 
 const link = {

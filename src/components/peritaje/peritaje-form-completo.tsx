@@ -110,6 +110,8 @@ export default function PeritajeFormCompleto({ peritaje, onClose, onSuccess }: P
         description: "El peritaje ha sido actualizado correctamente.",
       })
 
+      // Cerrar el formulario y notificar éxito
+      onClose()
       onSuccess()
     } catch (error) {
       console.error("Error al actualizar peritaje:", error)

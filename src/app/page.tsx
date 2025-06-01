@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/src/components/ui/button"
 import { RoleContent } from "../components/role-content"
+import { Img } from "@react-email/components"
 
 export default function HomePage() {
   return (
