@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { format, parseISO } from "date-fns"
 import { es } from "date-fns/locale"
@@ -12,7 +12,6 @@ import { FileText, RefreshCw, DollarSign } from "lucide-react"
 import { fetchPeritajesPendientes } from "@/src/lib/peritajes/peritaje"
 import { useToast } from "@/src/hooks/use-toast"
 import type { PeritajeData } from "@/src/lib/peritajes/peritaje"
-import PeritajeFormCompleto from "../peritaje/peritaje-form-completo"
 import PaymentEdit from "./payment-edit"
 
 export default function PaymentsAdmin() {
@@ -24,7 +23,7 @@ export default function PaymentsAdmin() {
   const [isFormOpen, setIsFormOpen] = useState(false)
 
   // Cargar los peritajes pendientes
-  const loadPeritajes = async () => {
+  const loadPeritajes = useCallback(async () => {
     setLoading(true)
     try {
       const data = await fetchPeritajesPendientes(true)
@@ -39,12 +38,12 @@ export default function PaymentsAdmin() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [toast])
 
   // Cargar los peritajes al montar el componente
   useEffect(() => {
     loadPeritajes()
-  }, [])
+  }, [loadPeritajes])
 
   // Abrir el formulario de edición
   const handleEditPeritaje = (peritaje: PeritajeData) => {

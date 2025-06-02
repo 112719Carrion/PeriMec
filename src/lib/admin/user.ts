@@ -1,6 +1,17 @@
 import { createServiceClient } from "@/src/lib/supabase"
 import type { UserData, CreateUserData } from "@/types/user"
 
+declare module '@supabase/supabase-js' {
+  interface User {
+    banned?: boolean
+    deleted_at?: string | null
+  }
+  
+  interface AdminUserAttributes {
+    banned?: boolean
+  }
+}
+
 // Función para obtener todos los usuarios
 export async function fetchUsers(): Promise<UserData[]> {
   try {

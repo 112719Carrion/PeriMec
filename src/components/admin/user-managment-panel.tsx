@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Input } from "@/src/components/ui/input"
 import { Button } from "@/src/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select"
@@ -42,18 +42,8 @@ export default function UserManagementPanel() {
   const [isProcessing, setIsProcessing] = useState(false)
   const { toast } = useToast()
 
-  // Cargar usuarios al montar el componente
-  useEffect(() => {
-    loadUsers()
-  }, [])
-
-  // Filtrar usuarios cuando cambian los filtros
-  useEffect(() => {
-    filterUsers()
-  }, [users, searchTerm, roleFilter, statusFilter])
-
   // Función para cargar usuarios desde Supabase
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     try {
@@ -71,7 +61,17 @@ export default function UserManagementPanel() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [toast])
+
+  // Cargar usuarios al montar el componente
+  useEffect(() => {
+    loadUsers()
+  }, [loadUsers])
+
+  // Filtrar usuarios cuando cambian los filtros
+  useEffect(() => {
+    filterUsers()
+  }, [users, searchTerm, roleFilter, statusFilter])
 
   // Función para filtrar usuarios según los criterios
   const filterUsers = () => {

@@ -9,6 +9,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recha
 import { createServiceClient } from "@/src/lib/supabase"
 import { useToast } from "@/src/hooks/use-toast"
 import PaymentDistribution from "@/src/components/admin/payment-distribution"
+import { DateRange } from "react-day-picker"
 
 interface ReportData {
   user_id: string
@@ -24,7 +25,7 @@ const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"]
 
 export default function ReportesPage() {
   const { toast } = useToast()
-  const [dateRange, setDateRange] = useState({
+  const [dateRange, setDateRange] = useState<DateRange>({
     from: addDays(new Date(), -30),
     to: new Date(),
   })
@@ -38,7 +39,7 @@ export default function ReportesPage() {
   useEffect(() => {
     const loadUsers = async () => {
       const supabase = createServiceClient()
-      const { data: usersData, error } = await supabase
+      const { data: usersData, error } = await supabase!
         .from("profiles")
         .select("id, full_name")
         .in("role", ["admin", "perito"])
@@ -65,11 +66,15 @@ export default function ReportesPage() {
       setLoading(true)
       const supabase = createServiceClient()
 
-      let query = supabase
+      let query = supabase!
         .from("peritajes")
         .select("user_id, estado, created_at")
-        .gte("created_at", dateRange.from.toISOString())
-        .lte("created_at", dateRange.to.toISOString())
+
+      if (dateRange.from && dateRange.to) {
+        query = query
+          .gte("created_at", dateRange.from.toISOString())
+          .lte("created_at", dateRange.to.toISOString())
+      }
 
       if (selectedUser !== "all") {
         query = query.eq("user_id", selectedUser)
@@ -129,7 +134,14 @@ export default function ReportesPage() {
             <CardTitle>Rango de fechas</CardTitle>
           </CardHeader>
           <CardContent>
-            <DatePickerWithRange date={dateRange} onDateChange={setDateRange} />
+            <DatePickerWithRange 
+              date={dateRange} 
+              onDateChange={(range) => {
+                if (range?.from && range?.to) {
+                  setDateRange(range)
+                }
+              }} 
+            />
           </CardContent>
         </Card>
 

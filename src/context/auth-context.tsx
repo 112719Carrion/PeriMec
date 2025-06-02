@@ -3,6 +3,7 @@
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
 import { supabase } from "@/src/lib/supabase"
+import { createServiceClient } from "@/src/lib/supabase"
 import type { SupabaseUser } from "@/src/lib/supabase"
 
 // Tipo para el perfil del usuario
@@ -47,7 +48,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Función para cargar el perfil del usuario
   const loadUserProfile = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      const supabaseService = createServiceClient()
+      if (!supabaseService) {
+        console.error("No se pudo crear el cliente de servicio")
+        return null
+      }
+
+      const { data, error } = await supabaseService
         .from("profiles")
         .select("id, role, full_name, updated_at")
         .eq("id", userId)

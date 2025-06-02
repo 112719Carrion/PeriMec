@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { format, parseISO } from "date-fns"
 import { es } from "date-fns/locale"
@@ -38,7 +38,7 @@ export default function PeritajesCompletadosView() {
   }, [])
 
   // Cargar los peritajes completados
-  const loadPeritajes = async () => {
+  const loadPeritajes = useCallback(async () => {
     setLoading(true)
     try {
       const data = await fetchPeritajesCompletados()
@@ -54,14 +54,14 @@ export default function PeritajesCompletadosView() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [toast])
 
   // Cargar los peritajes al montar el componente
   useEffect(() => {
     if (isClient) {
       loadPeritajes()
     }
-  }, [isClient])
+  }, [isClient, loadPeritajes])
 
   // Filtrar peritajes cuando cambia el término de búsqueda o la fecha
   useEffect(() => {

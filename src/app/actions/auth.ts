@@ -90,7 +90,7 @@ export async function loginUser(email: string, password: string) {
       return { success: false, message: "Credenciales inválidas" }
     }
 
-    return { success: true, user: data.user }
+    return { success: true, user: data!.user }
   } catch (error) {
     console.error("Error inesperado al iniciar sesión:", error)
     return { success: false, message: "Error al procesar el inicio de sesión" }
