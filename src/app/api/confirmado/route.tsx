@@ -6,7 +6,7 @@ import {Resend} from 'resend';
 
 const resend = new Resend(process.env.REACT_APP_RESEND_API_KEY!);
 
-export async function POST(request: Request, res: Response) {
+export async function POST(request: Request) {
     const {email, userFirstname, fecha, hora} = await request.json();
     
     const { data, error } = await resend.emails.send({
