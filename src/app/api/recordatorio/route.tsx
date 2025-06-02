@@ -5,18 +5,12 @@ import { Resend } from "resend"
 
 const resend = new Resend(process.env.REACT_APP_RESEND_API_KEY)
 
-export async function sendReminderEmail({
-  clienteEmail,
-  clienteNombre,
-  fechaPeritaje,
-  // Otros datos necesarios
-}: {
-  clienteEmail: string;
-  clienteNombre: string;
-  fechaPeritaje: string; // Cambia a Date si corresponde
-  // Otros datos necesarios: sus tipos aquí
-}) {
+import { NextRequest, NextResponse } from "next/server";
+
+export async function POST(request: NextRequest) {
   try {
+    const { clienteEmail, clienteNombre, fechaPeritaje, direccion } = await request.json();
+
     const data = await resend.emails.send({
       from: "PeriMec <notificaciones@perimec.com>",
       to: clienteEmail,
@@ -24,13 +18,13 @@ export async function sendReminderEmail({
       react: PeritajeReminderEmail({
         clienteNombre,
         fechaPeritaje,
-        // Otros datos necesarios
+        direccion,
       }),
-    })
+    });
 
-    return { success: true, data }
+    return NextResponse.json({ success: true, data });
   } catch (error) {
-    console.error("Error al enviar email de recordatorio:", error)
-    throw new Error("No se pudo enviar el email de recordatorio")
+    console.error("Error al enviar email de recordatorio:", error);
+    return NextResponse.json({ success: false, error: "No se pudo enviar el email de recordatorio" }, { status: 500 });
   }
 }

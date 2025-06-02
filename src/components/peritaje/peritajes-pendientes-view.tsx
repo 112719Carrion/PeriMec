@@ -15,7 +15,6 @@ import { fetchPeritajesPendientes } from "@/src/lib/peritajes/peritaje"
 import { useToast } from "@/src/hooks/use-toast"
 import PeritajeFormCompleto from "./peritaje-form-completo"
 import type { PeritajeData } from "@/src/lib/peritajes/peritaje"
-import { sendReminderEmail } from "@/src/app/api/recordatorio/route"
 import { cn } from "@/src/lib/utils"
 
 export default function PeritajesPendientesView() {
@@ -90,12 +89,20 @@ export default function PeritajesPendientesView() {
 
   const handleRecordatorio = async (peritaje: PeritajeData) => {
     setSelectedPeritaje(peritaje)
-    await sendReminderEmail({
+    await fetch("/api/recordatorio", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
       clienteEmail: peritaje.email_propietario,
       clienteNombre: peritaje.nombre_propietario,
       fechaPeritaje: peritaje.fecha_turno,
-    })
+    }),
+  })
   }
+
+
 
   // Cerrar el formulario de edición
   const handleCloseForm = () => {
