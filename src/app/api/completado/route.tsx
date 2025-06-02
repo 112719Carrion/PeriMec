@@ -3,7 +3,7 @@ import { Resend } from "resend"
 import PeritajeCompletadoEmail from "@/emails/peritaje-completado"
 
 // Inicializar Resend con la API key
-const resend = new Resend(process.env.REACT_APP_RESEND_API_KEY)
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(request: Request) {
   try {
