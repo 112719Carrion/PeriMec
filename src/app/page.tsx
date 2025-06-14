@@ -10,7 +10,7 @@ export default function HomePage() {
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-6">Bienvenido a PeriMec</h1>
         <p className="text-xl text-muted-foreground mb-8">Sistema de gestión de peritajes y administración</p>
 
-        <div className="grid gap-4 md:grid-cols-3 max-w-lg mx-auto">
+        <div className="grid gap-4 md:grid-cols-2 max-w-lg mx-auto">
           <Link href="/peritaje" className="w-full">
             <Button variant="outline" className="w-full">
               Peritajes
@@ -24,10 +24,6 @@ export default function HomePage() {
               </Button>
             </Link>
           </RoleContent>
-          
-          <Link href="/login" className="w-full">
-            <Button className="w-full">Iniciar Sesión</Button>
-          </Link>
         </div>
 
         <div className="mt-16 grid gap-8 md:grid-cols-3">
