@@ -309,7 +309,11 @@ export default function PeritajeForm({ appointmentDetails }: PeritajeFormProps) 
                       <FormItem>
                         <FormLabel>Nombre completo</FormLabel>
                         <FormControl>
-                          <Input placeholder="Ej: Juan Pérez" {...field} />
+                          <Input
+                            placeholder="Ej: Juan Pérez"
+                            maxLength={50}
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -322,7 +326,7 @@ export default function PeritajeForm({ appointmentDetails }: PeritajeFormProps) 
                       <FormItem>
                         <FormLabel>Teléfono</FormLabel>
                         <FormControl>
-                          <Input placeholder="Ej: 1123456789" {...field} />
+                          <Input placeholder="Ej: 1123456789" maxLength={50} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -335,7 +339,7 @@ export default function PeritajeForm({ appointmentDetails }: PeritajeFormProps) 
                       <FormItem className="col-span-1 md:col-span-2">
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input placeholder="Ej: juan@ejemplo.com" {...field} />
+                          <Input placeholder="Ej: juan@ejemplo.com" maxLength={50} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

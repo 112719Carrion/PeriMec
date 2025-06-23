@@ -25,7 +25,6 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children, sidebarItems }: AppLayoutProps) {
   const pathname = usePathname()
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
   // Elementos de la barra de navegación superior
   const navItems = [
@@ -37,18 +36,12 @@ export default function AppLayout({ children, sidebarItems }: AppLayoutProps) {
   // Usar los elementos proporcionados o un array vacío
   const currentSidebarItems = sidebarItems || []
 
-  // Cerrar menús móviles al cambiar de ruta
-  useEffect(() => {
-    setMobileSidebarOpen(false)
-  }, [pathname])
-
   return (
-    <div className="flex flex-1 h-screen overflow-hidden flex-col">
+    <div className="flex flex-col">
       <div className="flex flex-1 overflow-hidden">
-        {/* Barra lateral (escritorio) - solo se muestra si hay elementos */}
         {currentSidebarItems.length > 0 && (
-          <aside className="hidden md:flex w-64 flex-col border-r bg-muted/40 h-full">
-            <div className="flex flex-col p-4 space-y-2 flex-1">
+          <aside className="hidden md:flex w-64 flex-col border-r bg-muted/40 h-254">
+            <div className="flex flex-col p-4 space-y-2">
               {currentSidebarItems.map((item) => (
                 <Link
                   key={item.href}
@@ -63,87 +56,10 @@ export default function AppLayout({ children, sidebarItems }: AppLayoutProps) {
                 </Link>
               ))}
             </div>
-            {/* Footer en la barra lateral */}
-            <footer className="p-4 border-t">
-              <Link
-                href="/faq"
-                className="text-xs text-muted-foreground hover:underline"
-              >
-                Preguntas frecuentes
-              </Link>
-            </footer>
           </aside>
         )}
-
-        {/* Botón para mostrar/ocultar la barra lateral en móvil */}
-        {currentSidebarItems.length > 0 && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="fixed bottom-4 left-4 z-40 md:hidden"
-            onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
-          >
-            <Menu className="h-5 w-5" />
-            <span className="sr-only">Abrir barra lateral</span>
-          </Button>
-        )}
-
-        {/* Barra lateral móvil */}
-        {mobileSidebarOpen && currentSidebarItems.length > 0 && (
-          <div className="fixed inset-0 z-40 md:hidden">
-            {/* Fondo oscuro */}
-            <div className="fixed inset-0 bg-black/20" onClick={() => setMobileSidebarOpen(false)} aria-hidden="true" />
-
-            {/* Barra lateral */}
-            <div className="fixed inset-y-0 left-0 w-64 bg-background border-r flex flex-col">
-              <div className="flex items-center justify-between p-4 border-b">
-                <h2 className="font-semibold">Menú</h2>
-                <Button variant="ghost" size="icon" onClick={() => setMobileSidebarOpen(false)}>
-                  <X className="h-5 w-5" />
-                </Button>
-              </div>
-              <div className="flex flex-col p-4 space-y-2 flex-1">
-                {currentSidebarItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      "px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-muted",
-                      pathname === item.href ? "bg-muted text-primary" : "text-muted-foreground",
-                    )}
-                  >
-                    {item.icon && <span className="mr-2">{item.icon}</span>}
-                    {item.name}
-                  </Link>
-                ))}
-              </div>
-              {/* Footer en la barra lateral móvil */}
-              <footer className="p-4 border-t">
-                <Link
-                  href="/faq"
-                  className="text-xs text-muted-foreground hover:underline"
-                >
-                  Preguntas frecuentes
-                </Link>
-              </footer>
-            </div>
-          </div>
-        )}
-
-        {/* Contenido principal */}
-        <main className="flex-1 p-4 md:p-6 h-full overflow-auto">{children}</main>
+        <main className="flex-1 p-4 md:p-6 overflow-y-hidden">{children}</main>
       </div>
-      {/* Footer global para pantallas sin sidebar */}
-      {currentSidebarItems.length === 0 && (
-        <footer className="w-full p-4 border-t text-center">
-          <Link
-            href="/faq"
-            className="text-xs text-muted-foreground hover:underline"
-          >
-            Preguntas frecuentes
-          </Link>
-        </footer>
-      )}
     </div>
   )
 }
