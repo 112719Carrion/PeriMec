@@ -1,7 +1,7 @@
-import { RoleContent } from "@/src/components/role-content";
+import { RoleContent } from "@/src/components/role-content"
 import { Button } from "@/src/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/src/components/ui/card"
-import { fetchKPIPeritajes } from "@/src/lib/peritajes/stats";
+import { fetchKPIPeritajes } from "@/src/lib/peritajes/stats"
 import Link from "next/link"
 
 export default function PeritajePage() {
@@ -18,7 +18,7 @@ export default function PeritajePage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <RoleContent allowedRoles={["admin", "perito"]}>  
+        <RoleContent allowedRoles={["admin", "perito"]}>
           <Card>
             <CardHeader>
               <CardTitle>Peritajes Pendientes</CardTitle>

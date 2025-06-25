@@ -23,18 +23,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className="h-full" suppressHydrationWarning>
-      <body className={inter.className} h-full overflow-hidden>
+      <body className={`${inter.className} h-full overflow-hidden`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AuthProvider>
             <ToastProvider>
-              <div className="flex min-h-screen flex-col">
+              <div className="h-full flex flex-col">
                 <Navbar />
-                <main className="flex-1 overflow-auto">{children}</main>
-                  <footer className="w-full border-t p-4 text-center bg-muted/40">
-                    <Link href="/faq" className="text-xs text-muted-foreground hover:underline">
-                      Preguntas frecuentes
-                    </Link>
-                  </footer>
+                <main className="flex-1 min-h-0">{children}</main>
+                <footer className="w-full border-t p-4 text-center bg-muted/40 flex-shrink-0">
+                  <Link href="/faq" className="text-xs text-muted-foreground hover:underline">
+                    Preguntas frecuentes
+                  </Link>
+                </footer>
               </div>
             </ToastProvider>
           </AuthProvider>
