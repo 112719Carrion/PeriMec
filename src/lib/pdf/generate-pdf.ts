@@ -127,10 +127,8 @@ function agregarPieDePagina(doc: jsPDF) {
 }
 
 // Función para verificar si hay suficiente espacio en la página actual
-function verificarEspacioDisponible(doc: jsPDF, alturaRequerida: number, margenInferior = 270): boolean {
-  // @ts-ignore - Esta es una propiedad válida de jsPDF
-  const y = doc.lastAutoTable?.finalY || doc.y
-  const espacioDisponible = margenInferior - y
+function verificarEspacioDisponible(doc: jsPDF, alturaRequerida: number, yPosActual: number, margenInferior = 270): boolean {
+  const espacioDisponible = margenInferior - yPosActual
   return espacioDisponible >= alturaRequerida
 }
 
@@ -294,8 +292,12 @@ export const generatePeritajePDF = (peritaje: PeritajeForPDF) => {
 
   // Observaciones
   if (peritaje.observaciones && peritaje.observaciones.trim() !== "") {
-    // Verificar si hay suficiente espacio para el título y al menos una línea de texto
-    if (!verificarEspacioDisponible(doc, 40)) {
+    // Dividir el texto de observaciones en líneas para calcular la altura necesaria
+    const textLines = doc.splitTextToSize(peritaje.observaciones, 170)
+    const alturaTexto = textLines.length * 5 + 25 // 25 para el título y espaciado
+
+    // Verificar si hay suficiente espacio para el título y el texto
+    if (!verificarEspacioDisponible(doc, alturaTexto, yPos, 270)) {
       doc.addPage()
       yPos = 20 // Reiniciar la posición Y en la nueva página
     }
@@ -306,28 +308,17 @@ export const generatePeritajePDF = (peritaje: PeritajeForPDF) => {
 
     doc.setFontSize(10)
     doc.setTextColor(80, 80, 80)
-
-    // Dividir el texto de observaciones en líneas para que quepa en el PDF
-    const textLines = doc.splitTextToSize(peritaje.observaciones, 170)
-
-    // Verificar si hay suficiente espacio para todas las líneas
-    const alturaTexto = textLines.length * 5 + 10
-    if (!verificarEspacioDisponible(doc, alturaTexto)) {
-      doc.addPage()
-      yPos = 20 // Reiniciar la posición Y en la nueva página
-      doc.text("Observaciones (continuación)", 20, yPos)
-      doc.text(textLines, 20, yPos + 10)
-      yPos = yPos + 10 + textLines.length * 5
-    } else {
-      doc.text(textLines, 20, yPos + 25)
-      yPos = yPos + 25 + textLines.length * 5
-    }
+    doc.text(textLines, 20, yPos + 25)
+    yPos = yPos + 25 + textLines.length * 5
   }
 
   // Conclusión
-  // Verificar si hay suficiente espacio para el título y al menos una línea de texto
-  if (!verificarEspacioDisponible(doc, 60)) {
-    // Aumentado a 60 para dar más espacio
+  const conclusion = peritaje.conclusion || generarConclusion(peritaje)
+  const conclusionLines = doc.splitTextToSize(conclusion, 170)
+  const alturaConclusionTexto = conclusionLines.length * 5 + 25 // 25 para el título y espaciado
+
+  // Verificar si hay suficiente espacio para la conclusión
+  if (!verificarEspacioDisponible(doc, alturaConclusionTexto, yPos, 270)) {
     doc.addPage()
     yPos = 20 // Reiniciar la posición Y en la nueva página
   }
@@ -338,25 +329,7 @@ export const generatePeritajePDF = (peritaje: PeritajeForPDF) => {
 
   doc.setFontSize(10)
   doc.setTextColor(80, 80, 80)
-  const conclusion = peritaje.conclusion || generarConclusion(peritaje)
-  const conclusionLines = doc.splitTextToSize(conclusion, 170)
-
-  // Verificar si hay suficiente espacio para todas las líneas de la conclusión
-  const alturaConclusionTexto = conclusionLines.length * 5 + 10
-  if (!verificarEspacioDisponible(doc, alturaConclusionTexto)) {
-    // Si no hay suficiente espacio, añadir una nueva página para la conclusión completa
-    doc.addPage()
-    yPos = 20 // Reiniciar la posición Y en la nueva página
-    doc.setFontSize(14)
-    doc.setTextColor(60, 60, 60)
-    doc.text("Conclusión", 20, yPos)
-
-    doc.setFontSize(10)
-    doc.setTextColor(80, 80, 80)
-    doc.text(conclusionLines, 20, yPos + 15)
-  } else {
-    doc.text(conclusionLines, 20, yPos + 25)
-  }
+  doc.text(conclusionLines, 20, yPos + 25)
 
   // Agregar pie de página a todas las páginas
   agregarPieDePagina(doc)
