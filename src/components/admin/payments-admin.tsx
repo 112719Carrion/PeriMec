@@ -13,6 +13,12 @@ import { fetchPeritajesPendientes } from "@/src/lib/peritajes/peritaje"
 import { useToast } from "@/src/hooks/use-toast"
 import type { PeritajeData } from "@/src/lib/peritajes/peritaje"
 import PaymentEdit from "./payment-edit"
+import { DateRange } from "react-day-picker"
+import { addDays, isAfter, isBefore } from "date-fns"
+import { Calendar } from "@/src/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/src/components/ui/popover"
+import { cn } from "@/src/lib/utils"
+import { format as formatDateFns } from "date-fns"
 
 export default function PaymentsAdmin() {
   const router = useRouter()
@@ -21,13 +27,23 @@ export default function PaymentsAdmin() {
   const [loading, setLoading] = useState(true)
   const [selectedPeritaje, setSelectedPeritaje] = useState<PeritajeData | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
+  const [tipoPago, setTipoPago] = useState<"efectivo" | "mercado_pago">("efectivo")
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({ from: undefined, to: undefined })
 
-  // Cargar los peritajes pendientes
+  // Cargar los peritajes pendientes o por tipo de pago
   const loadPeritajes = useCallback(async () => {
     setLoading(true)
     try {
-      const data = await fetchPeritajesPendientes(true)
-      setPeritajes(data)
+      const data = await fetchPeritajesPendientes(tipoPago === "efectivo")
+      // Filtrar por rango de fechas si está definido
+      const filtrados = data.filter(p => {
+        if (!dateRange?.from && !dateRange?.to) return true
+        const fecha = parseISO(p.fecha_turno)
+        const afterFrom = dateRange.from ? !isBefore(fecha, dateRange.from) : true
+        const beforeTo = dateRange.to ? !isAfter(fecha, dateRange.to) : true
+        return afterFrom && beforeTo
+      })
+      setPeritajes(filtrados)
     } catch (error) {
       console.error("Error al cargar peritajes pendientes:", error)
       toast({
@@ -38,7 +54,7 @@ export default function PaymentsAdmin() {
     } finally {
       setLoading(false)
     }
-  }, [toast])
+  }, [tipoPago, dateRange, toast])
 
   // Cargar los peritajes al montar el componente
   useEffect(() => {
@@ -79,11 +95,67 @@ export default function PaymentsAdmin() {
 
   return (
     <div className="container mx-auto py-6">
+      {/* Filtros dentro de una tarjeta */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Filtros</CardTitle>
+          <CardDescription>Filtra los pagos por tipo y rango de fechas</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-4 items-end">
+            <div>
+              <label className="block text-sm font-medium mb-1">Tipo de pago</label>
+              <select
+                className="border rounded px-2 py-1"
+                value={tipoPago}
+                onChange={e => setTipoPago(e.target.value as any)}
+              >
+                <option value="efectivo">Efectivo</option>
+                <option value="mercado_pago">Mercado Pago</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Rango de fechas</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    className={cn(
+                      "w-[260px] justify-start text-left font-normal border rounded px-2 py-1",
+                      !dateRange?.from && "text-muted-foreground"
+                    )}
+                  >
+                    {dateRange?.from ?
+                      dateRange.to
+                        ? `${formatDateFns(dateRange.from, "dd/MM/yyyy")} - ${formatDateFns(dateRange.to, "dd/MM/yyyy")}`
+                        : formatDateFns(dateRange.from, "dd/MM/yyyy")
+                      : "Seleccionar rango"}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    initialFocus
+                    mode="range"
+                    defaultMonth={dateRange?.from}
+                    selected={dateRange}
+                    onSelect={setDateRange}
+                    numberOfMonths={2}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <Button onClick={loadPeritajes} disabled={loading} variant="outline">
+              <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+              Filtrar
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+      {/* Fin filtros */}
       <Card className="w-full">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-2xl">Peritajes con pago pendiente</CardTitle>
-            <CardDescription>Lista de peritajes pendientes de completar el pago de la seña</CardDescription>
+            <CardTitle className="text-2xl">Pagos registrados</CardTitle>
+            <CardDescription>Lista de pagos en {tipoPago === "efectivo" ? "efectivo" : "Mercado pago"}.</CardDescription>
           </div>
           <Button onClick={loadPeritajes} variant="outline" size="sm" disabled={loading}>
             <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
@@ -109,7 +181,9 @@ export default function PaymentsAdmin() {
                   <TableHead>Teléfono</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Estado</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
+                  {tipoPago === "efectivo" && (
+                    <TableHead className="text-right">Acciones</TableHead>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -126,15 +200,17 @@ export default function PaymentsAdmin() {
                       </span>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        onClick={() => handleEditPeritaje(peritaje)}
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0"
-                      >
-                        <DollarSign className="h-4 w-4" />
-                        <span className="sr-only">Impactar pago</span>
-                      </Button>
+                      {tipoPago === "efectivo" && (
+                        <Button
+                          onClick={() => handleEditPeritaje(peritaje)}
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                        >
+                          <DollarSign className="h-4 w-4" />
+                          <span className="sr-only">Impactar pago</span>
+                        </Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

@@ -21,7 +21,7 @@ export default function PaymentsAdminPage() {
       </div>
       <div className="border-b pb-2">
         <p className="text-muted-foreground">
-          Administra los peritajes que tiene pendiente asignar un pago.
+          Administra los pagos registrados o pendientes.
         </p>
       </div>
       <div className="flex-1 overflow-auto">
