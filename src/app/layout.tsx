@@ -12,7 +12,7 @@ import Link from "next/link"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Mi Aplicación",
+  title: "PeriMec",
   description: "Aplicación de gestión de peritajes",
 }
 

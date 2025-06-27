@@ -3,17 +3,16 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card"
 import { Button } from "@/src/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/src/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select"
-import { CalendarIcon, RefreshCw, TrendingUp } from "lucide-react"
+import { RefreshCw, TrendingUp } from "lucide-react"
 import { format, subDays, subMonths, subYears, startOfDay, endOfDay } from "date-fns"
 import { es } from "date-fns/locale"
-import { cn } from "@/src/lib/utils"
+import { DateRange } from "react-day-picker"
 import { fetchPeritajesStats } from "@/src/lib/peritajes/stats"
 import { useToast } from "@/src/hooks/use-toast"
 import PeritajesStatsCards from "./peritajes-stats-cards"
 import PeritajesPieChart from "./pertitajes-pie-chart"
+import { DatePickerWithRange } from "@/src/components/ui/date-range-picker"
 
 export interface PeritajesStats {
   pendientes: number
@@ -33,18 +32,20 @@ export default function PeritajesInformesView() {
     total: 0,
   })
   const [loading, setLoading] = useState(true)
-  const [dateFrom, setDateFrom] = useState<Date>(subMonths(new Date(), 1))
-  const [dateTo, setDateTo] = useState<Date>(new Date())
-  const [isFromCalendarOpen, setIsFromCalendarOpen] = useState(false)
-  const [isToCalendarOpen, setIsToCalendarOpen] = useState(false)
+  const [dateRange, setDateRange] = useState<DateRange>({
+    from: subMonths(new Date(), 1),
+    to: new Date(),
+  })
 
   // Cargar las estadísticas
   const loadStats = async () => {
+    if (!dateRange.from || !dateRange.to) return
+    
     setLoading(true)
     try {
       const data = await fetchPeritajesStats(
-        format(startOfDay(dateFrom), "yyyy-MM-dd"),
-        format(endOfDay(dateTo), "yyyy-MM-dd"),
+        format(startOfDay(dateRange.from), "yyyy-MM-dd"),
+        format(endOfDay(dateRange.to), "yyyy-MM-dd"),
       )
       setStats(data)
     } catch (error) {
@@ -62,27 +63,35 @@ export default function PeritajesInformesView() {
   // Cargar estadísticas al montar el componente y cuando cambien las fechas
   useEffect(() => {
     loadStats()
-  }, [dateFrom, dateTo])
+  }, [dateRange])
 
   // Funciones para establecer períodos predefinidos
   const setLastWeek = () => {
-    setDateFrom(subDays(new Date(), 7))
-    setDateTo(new Date())
+    setDateRange({
+      from: subDays(new Date(), 7),
+      to: new Date(),
+    })
   }
 
   const setLastMonth = () => {
-    setDateFrom(subMonths(new Date(), 1))
-    setDateTo(new Date())
+    setDateRange({
+      from: subMonths(new Date(), 1),
+      to: new Date(),
+    })
   }
 
   const setLast3Months = () => {
-    setDateFrom(subMonths(new Date(), 3))
-    setDateTo(new Date())
+    setDateRange({
+      from: subMonths(new Date(), 3),
+      to: new Date(),
+    })
   }
 
   const setLastYear = () => {
-    setDateFrom(subYears(new Date(), 1))
-    setDateTo(new Date())
+    setDateRange({
+      from: subYears(new Date(), 1),
+      to: new Date(),
+    })
   }
 
   return (
@@ -103,7 +112,6 @@ export default function PeritajesInformesView() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
-            <CalendarIcon className="mr-2 h-5 w-5" />
             Filtros de período
           </CardTitle>
           <CardDescription>Selecciona el rango de fechas para generar el informe</CardDescription>
@@ -132,7 +140,7 @@ export default function PeritajesInformesView() {
                 }}
               >
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Seleccionar período" />
+                  <SelectValue placeholder="Último mes " />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="week">Última semana</SelectItem>
@@ -143,73 +151,14 @@ export default function PeritajesInformesView() {
               </Select>
             </div>
 
-            {/* Fecha desde */}
+            {/* Selector de rango de fechas */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Desde</label>
-              <Popover open={isFromCalendarOpen} onOpenChange={setIsFromCalendarOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-[240px] justify-start text-left font-normal",
-                      !dateFrom && "text-muted-foreground",
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateFrom ? format(dateFrom, "PPP", { locale: es }) : "Seleccionar fecha"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={dateFrom}
-                    onSelect={(date) => {
-                      if (date) {
-                        setDateFrom(date)
-                        setIsFromCalendarOpen(false)
-                      }
-                    }}
-                    disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <label className="text-sm font-medium">Rango de fechas</label>
+              <DatePickerWithRange 
+                date={dateRange} 
+                onDateChange={setDateRange} 
+              />
             </div>
-
-            {/* Fecha hasta */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Hasta</label>
-              <Popover open={isToCalendarOpen} onOpenChange={setIsToCalendarOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn("w-[240px] justify-start text-left font-normal", !dateTo && "text-muted-foreground")}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateTo ? format(dateTo, "PPP", { locale: es }) : "Seleccionar fecha"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={dateTo}
-                    onSelect={(date) => {
-                      if (date) {
-                        setDateTo(date)
-                        setIsToCalendarOpen(false)
-                      }
-                    }}
-                    disabled={(date) => date > new Date() || date < dateFrom}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
-
-          <div className="mt-4 text-sm text-muted-foreground">
-            Período seleccionado: {format(dateFrom, "dd/MM/yyyy", { locale: es })} -{" "}
-            {format(dateTo, "dd/MM/yyyy", { locale: es })}
           </div>
         </CardContent>
       </Card>

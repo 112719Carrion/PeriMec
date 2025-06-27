@@ -76,7 +76,7 @@ export default function PeritajeFormCompleto({ peritaje, onClose, onSuccess }: P
       patente: peritaje.patente,
       kilometraje: peritaje.kilometraje,
       color: peritaje.color,
-      tipo_combustible: peritaje.tipo_combustible,
+      tipo_combustible: ["nafta", "diesel", "gnc", "electrico", "hibrido"].includes(peritaje.tipo_combustible || "") ? peritaje.tipo_combustible : "",
       observaciones: peritaje.observaciones || "",
       nombre_propietario: peritaje.nombre_propietario,
       telefono_propietario: peritaje.telefono_propietario,
@@ -228,7 +228,7 @@ export default function PeritajeFormCompleto({ peritaje, onClose, onSuccess }: P
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Tipo de combustible</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value || ""}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Seleccione el tipo de combustible" />

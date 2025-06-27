@@ -160,7 +160,7 @@ export default function PeritajesCompletadosView() {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-2xl">Peritajes Completados</CardTitle>
-            <CardDescription>Lista de peritajes finalizados</CardDescription>
+            <CardDescription>Lista de peritajes finalizados y cancelados</CardDescription>
           </div>
           <Button onClick={loadPeritajes} variant="outline" size="sm" disabled={loading}>
             <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
@@ -214,12 +214,12 @@ export default function PeritajesCompletadosView() {
               <FileText className="h-12 w-12 text-muted-foreground mb-4" />
               <p className="text-lg font-medium">
                 {peritajes.length === 0
-                  ? "No hay peritajes completados"
+                  ? "No hay peritajes completados o cancelados"
                   : "No se encontraron resultados"}
               </p>
               <p className="text-sm text-muted-foreground">
                 {peritajes.length === 0
-                  ? "Cuando se complete un peritaje, aparecerá en esta lista"
+                  ? "Cuando se complete o cancele un peritaje, aparecerá en esta lista"
                   : "Intenta con otros criterios de búsqueda"}
               </p>
             </div>
@@ -247,8 +247,12 @@ export default function PeritajesCompletadosView() {
                     </TableCell>
                     <TableCell>{peritaje.patente}</TableCell>
                     <TableCell>
-                      <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-                        Completado
+                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        peritaje.estado === "completado" 
+                          ? "bg-green-100 text-green-800" 
+                          : "bg-red-100 text-red-800"
+                      }`}>
+                        {peritaje.estado === "completado" ? "Completado" : "Cancelado"}
                       </span>
                     </TableCell>
                     <TableCell className="text-right">

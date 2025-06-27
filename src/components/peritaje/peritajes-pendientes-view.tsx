@@ -222,8 +222,12 @@ export default function PeritajesPendientesView() {
                     <TableCell>{peritaje.telefono_propietario}</TableCell>
                     <TableCell>{peritaje.email_propietario}</TableCell>
                     <TableCell>
-                      <span className="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">
-                        Pendiente
+                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        peritaje.estado === "pendiente" 
+                          ? "bg-yellow-100 text-yellow-800" 
+                          : "bg-blue-100 text-blue-800"
+                      }`}>
+                        {peritaje.estado === "pendiente" ? "Pendiente" : "En proceso"}
                       </span>
                     </TableCell>
                     <TableCell className="text-center">

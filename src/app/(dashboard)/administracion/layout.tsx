@@ -8,8 +8,7 @@ export default function AdministracionLayout({
 }) {
   // Elementos específicos para la sección de Administración
   const adminSidebarItems = [
-    { name: "Usuarios", href: "/administracion" },
-    { name: "Configuración", href: "/administracion/configuracion" },
+    { name: "Usuarios", href: "/administracion/usuarios" },
     { name: "Reportes", href: "/administracion/reportes" },
     { name: "Pagos", href: "/administracion/pagos" },
   ]

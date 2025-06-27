@@ -17,7 +17,6 @@ interface PeritajeCompletoViewProps {
 
 export default function PeritajeCompletoView({ peritaje }: PeritajeCompletoViewProps) {
   const router = useRouter()
-  const [isPDFPreviewOpen, setIsPDFPreviewOpen] = useState(false)
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
   const [isClient, setIsClient] = useState(false)
   const [formattedDate, setFormattedDate] = useState<string>("")
@@ -56,11 +55,6 @@ export default function PeritajeCompletoView({ peritaje }: PeritajeCompletoViewP
     }
   }
 
-  // Manejar la vista previa del PDF
-  const handlePreviewPDF = () => {
-    setIsPDFPreviewOpen(true)
-  }
-
   // Si no estamos en el cliente o no hay peritaje, mostrar un esqueleto
   if (!isClient || !peritaje) {
     return (
@@ -71,10 +65,6 @@ export default function PeritajeCompletoView({ peritaje }: PeritajeCompletoViewP
             Volver
           </Button>
           <div className="flex gap-2">
-            <Button variant="outline" disabled>
-              <FileText className="mr-2 h-4 w-4" />
-              Vista previa
-            </Button>
             <Button disabled>
               <Download className="mr-2 h-4 w-4" />
               Descargar PDF
@@ -103,10 +93,6 @@ export default function PeritajeCompletoView({ peritaje }: PeritajeCompletoViewP
           Volver
         </Button>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handlePreviewPDF}>
-            <FileText className="mr-2 h-4 w-4" />
-            Vista previa
-          </Button>
           <Button onClick={handleGeneratePDF} disabled={isGeneratingPDF}>
             <Download className={`mr-2 h-4 w-4 ${isGeneratingPDF ? "animate-spin" : ""}`} />
             {isGeneratingPDF ? "Generando..." : "Descargar PDF"}
@@ -293,11 +279,6 @@ export default function PeritajeCompletoView({ peritaje }: PeritajeCompletoViewP
           </Card>
         </TabsContent>
       </Tabs>
-
-      {/* Diálogo de vista previa del PDF */}
-      {isClient && peritaje && (
-        <PDFPreview peritaje={peritaje} open={isPDFPreviewOpen} onClose={() => setIsPDFPreviewOpen(false)} />
-      )}
     </div>
   )
 }

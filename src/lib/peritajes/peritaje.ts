@@ -133,7 +133,7 @@ export async function fetchPeritajes() {
 // Función para obtener peritajes pendientes
 export async function fetchPeritajesPendientes(señado:boolean = false) {
   try {
-    console.log("Iniciando fetchPeritajesPendiente222s...")
+    console.log("Iniciando fetchPeritajesPendientes...")
 
     // Crear el cliente de servicio
     const supabase = createServiceClient()
@@ -143,11 +143,11 @@ export async function fetchPeritajesPendientes(señado:boolean = false) {
       throw new Error("Error de configuración de Supabase")
     }
 
-    // Consultar la tabla de peritajes filtrando por estado pendiente
+    // Consultar la tabla de peritajes filtrando por estado pendiente y en_proceso
     const { data, error } = await supabase
       .from("peritajes")
       .select("*")
-      .eq("estado", "pendiente")
+      .in("estado", ["pendiente", "en_proceso"])
       .eq("senaPendiente", señado)
       .order("fecha_turno", { ascending: true })
 
@@ -340,11 +340,11 @@ export async function fetchPeritajesCompletados() {
       throw new Error("Error de configuración de Supabase")
     }
 
-    // Consultar la tabla de peritajes filtrando por estado completado
+    // Consultar la tabla de peritajes filtrando por estado completado y cancelado
     const { data, error } = await supabase
       .from("peritajes")
       .select("*")
-      .eq("estado", "completado")
+      .in("estado", ["completado", "cancelado"])
       .order("fecha_turno", { ascending: false })
 
     if (error) {
