@@ -180,7 +180,9 @@ export default function PaymentsAdmin() {
                   <TableHead>Propietario</TableHead>
                   <TableHead>Teléfono</TableHead>
                   <TableHead>Email</TableHead>
+                  {tipoPago === "efectivo" && (
                   <TableHead>Estado</TableHead>
+                  )}
                   {tipoPago === "efectivo" && (
                     <TableHead className="text-right">Acciones</TableHead>
                   )}
@@ -195,9 +197,11 @@ export default function PaymentsAdmin() {
                     <TableCell>{peritaje.telefono_propietario}</TableCell>
                     <TableCell>{peritaje.email_propietario}</TableCell>
                     <TableCell>
+                      {tipoPago === "efectivo" && (
                       <span className="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">
                         Pendiente
                       </span>
+                      )}
                     </TableCell>
                     <TableCell className="text-right">
                       {tipoPago === "efectivo" && (
