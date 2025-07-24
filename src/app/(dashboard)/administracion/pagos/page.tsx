@@ -4,7 +4,7 @@ import PaymentsAdmin from "@/src/components/admin/payments-admin"
 import PaymentDistribution from "@/src/components/admin/payment-distribution"
 import { useState } from "react"
 import { PieChartIcon } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/src/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/src/components/ui/dialog"
 import { Button } from "@/src/components/ui/button"
 
 export default function PaymentsAdminPage() {
@@ -29,6 +29,7 @@ export default function PaymentsAdminPage() {
         <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle>Distribución de Pagos</DialogTitle>
+            <DialogDescription>Visualización gráfica de la distribución de pagos registrados.</DialogDescription>
           </DialogHeader>
           <PaymentDistribution />
         </DialogContent>

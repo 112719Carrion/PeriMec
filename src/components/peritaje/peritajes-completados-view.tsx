@@ -7,7 +7,7 @@ import { es } from "date-fns/locale"
 import { Button } from "@/src/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/src/components/ui/table"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/src/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/src/components/ui/dialog"
 import { Input } from "@/src/components/ui/input"
 import { Calendar } from "@/src/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/src/components/ui/popover"
@@ -291,6 +291,7 @@ export default function PeritajesCompletadosView() {
         <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Detalles del Peritaje</DialogTitle>
+            <DialogDescription>Vista detallada del peritaje seleccionado.</DialogDescription>
           </DialogHeader>
           {selectedPeritaje && <PeritajeCompletoView peritaje={selectedPeritaje} />}
         </DialogContent>

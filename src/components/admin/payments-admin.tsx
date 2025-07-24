@@ -7,7 +7,7 @@ import { es } from "date-fns/locale"
 import { Button } from "@/src/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/src/components/ui/table"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/src/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/src/components/ui/dialog"
 import { FileText, RefreshCw, DollarSign } from "lucide-react"
 import { fetchPeritajesPendientes } from "@/src/lib/peritajes/peritaje"
 import { useToast } from "@/src/hooks/use-toast"
@@ -229,6 +229,7 @@ export default function PaymentsAdmin() {
         <DialogContent className="sm:max-w-[900px]">
           <DialogHeader>
             <DialogTitle>Impactar Pago</DialogTitle>
+            <DialogDescription>Formulario para registrar el pago del peritaje seleccionado.</DialogDescription>
           </DialogHeader>
           {selectedPeritaje && (
             <PaymentEdit

@@ -6,7 +6,7 @@ import { es } from "date-fns/locale"
 import { Button } from "@/src/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/src/components/ui/table"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/src/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/src/components/ui/dialog"
 import { Input } from "@/src/components/ui/input"
 import { Calendar } from "@/src/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/src/components/ui/popover"
@@ -265,6 +265,7 @@ export default function PeritajesPendientesView() {
         <DialogContent className="sm:max-w-[900px]">
           <DialogHeader>
             <DialogTitle>Editar Peritaje</DialogTitle>
+            <DialogDescription>Formulario para editar los datos del peritaje seleccionado.</DialogDescription>
           </DialogHeader>
           {selectedPeritaje && (
             <PeritajeFormCompleto

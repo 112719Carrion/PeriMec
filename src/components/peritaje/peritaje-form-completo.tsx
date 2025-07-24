@@ -65,6 +65,7 @@ interface PeritajeFormCompletoProps {
 export default function PeritajeFormCompleto({ peritaje, onClose, onSuccess }: PeritajeFormCompletoProps) {
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [activeTab, setActiveTab] = useState("vehiculo")
 
   // Inicializar el formulario con los datos del peritaje
   const form = useForm<FormValues>({
@@ -125,6 +126,27 @@ export default function PeritajeFormCompleto({ peritaje, onClose, onSuccess }: P
     }
   }
 
+  // Nuevo: Manejar el submit con validación para cambiar de pestaña si hay errores en la primera
+  const handleSubmit = form.handleSubmit(onSubmit, () => {
+    // Campos de la primera pestaña
+    const vehiculoFields = [
+      "marca",
+      "modelo",
+      "anio",
+      "patente",
+      "kilometraje",
+      "color",
+      "tipo_combustible",
+      "estado",
+      "observaciones"
+    ]
+    const errors = form.formState.errors
+    const hasVehiculoError = vehiculoFields.some((field) => (errors as any)[field])
+    if (hasVehiculoError) {
+      setActiveTab("vehiculo")
+    }
+  })
+
   // Opciones para los selectores de estado
   const estadoOptions = ["excelente", "bueno", "regular", "malo", "crítico"]
 
@@ -132,9 +154,9 @@ export default function PeritajeFormCompleto({ peritaje, onClose, onSuccess }: P
     <div className="py-4">
       <h2 className="text-xl font-bold mb-4">Editar Peritaje</h2>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="max-h-[70vh] overflow-y-auto pr-2">
-            <Tabs defaultValue="vehiculo" className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid grid-cols-3 mb-4">
                 <TabsTrigger value="vehiculo">Vehículo</TabsTrigger>
                 <TabsTrigger value="propietario">Propietario</TabsTrigger>

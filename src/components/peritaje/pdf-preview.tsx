@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/src/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/src/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/src/components/ui/dialog"
 import { Loader2, Download, X } from "lucide-react"
 import { generatePeritajePDF, type PeritajeForPDF } from "@/src/lib/pdf/generate-pdf"
 
@@ -82,6 +82,7 @@ export default function PDFPreview({ peritaje, open, onClose }: PDFPreviewProps)
       <DialogContent className="sm:max-w-[800px] sm:max-h-[80vh]">
         <DialogHeader>
           <DialogTitle>Vista previa del informe de peritaje</DialogTitle>
+          <DialogDescription>Previsualización del PDF generado para el peritaje.</DialogDescription>
         </DialogHeader>
 
         <div className="flex-1 overflow-auto">
